@@ -1,0 +1,137 @@
+import React from 'react';
+import { MENU_DATA, DIETARY_ICONS } from '../constants';
+import { MenuItem, MenuCategory } from '../types';
+import { VegIcon, NonVegIcon, DietaryIcon } from './Icons';
+import { Beaker } from 'lucide-react';
+
+const MenuItemCard: React.FC<{ item: MenuItem }> = ({ item }) => {
+  return (
+    <div className="group relative bg-white border border-brand-teal p-5 shadow-[4px_4px_0px_0px_rgba(251,173,37,0.3)] hover:shadow-[6px_6px_0px_0px_rgba(251,173,37,1)] transition-all duration-300 hover:-translate-y-1">
+      <div className="flex justify-between items-start mb-2">
+        <h4 className="font-display text-xl font-bold text-brand-teal pr-2 leading-tight uppercase group-hover:text-brand-yellow transition-colors">
+          {item.name}
+        </h4>
+        <div className="flex-shrink-0 mt-1 scale-110">
+          {item.type === 'veg' && <VegIcon />}
+          {item.type === 'non-veg' && <NonVegIcon />}
+          {item.type === 'both' && (
+             <div className="flex gap-1">
+               <VegIcon />
+               <NonVegIcon />
+             </div>
+          )}
+        </div>
+      </div>
+      
+      {item.description && (
+        <p className="text-sm text-gray-500 font-sans mb-3 italic">
+          {item.description}
+        </p>
+      )}
+
+      <div className="flex justify-between items-end mt-4 border-t-2 border-dashed border-gray-200 pt-3">
+        <div className="flex gap-1">
+          {item.icons?.map((icon, idx) => (
+            <div key={idx}>
+               <DietaryIcon type={icon} />
+            </div>
+          ))}
+        </div>
+        <div className="font-display text-2xl text-brand-teal font-semibold">
+          <span className="text-sm font-sans font-normal mr-1 text-gray-400">₹</span>
+          {item.price}
+        </div>
+      </div>
+
+      {/* Lab detail decoration */}
+      <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-brand-cream border border-brand-teal/20"></div>
+      <div className="absolute bottom-1 left-1 w-2 h-2 rounded-full bg-brand-cream border border-brand-teal/20"></div>
+    </div>
+  );
+};
+
+const MenuSection: React.FC = () => {
+  return (
+    <section id="menu" className="py-20 relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div className="text-center mb-16">
+          <div className="inline-block bg-brand-yellow p-4 rounded-full border-4 border-brand-teal mb-4 shadow-lg">
+            <Beaker className="w-10 h-10 text-brand-teal" strokeWidth={2.5} />
+          </div>
+          <h2 className="font-display text-5xl md:text-7xl text-brand-teal uppercase font-bold tracking-tight">
+            Experimental Menu
+          </h2>
+          <p className="mt-4 text-xl text-gray-600 font-sans bg-white inline-block px-4 py-1 border border-brand-teal/20 rounded-full">
+            Calibrated for maximum flavour
+          </p>
+        </div>
+
+        <div className="space-y-16">
+          {MENU_DATA.map((category: MenuCategory) => (
+            <div key={category.id} className="relative">
+              {/* Category Header */}
+              <div className="flex flex-col md:flex-row md:items-end gap-2 md:gap-4 mb-8 border-b-4 border-brand-teal pb-2">
+                <h3 className="font-display text-4xl text-brand-teal uppercase tracking-wide bg-brand-teal text-brand-cream px-4 py-1 inline-block transform -skew-x-12">
+                  <span className="transform skew-x-12 inline-block">{category.title}</span>
+                </h3>
+                {category.note && (
+                   <span className="font-sans text-brand-teal/70 font-medium pb-1 italic pl-2">
+                     {category.note}
+                   </span>
+                )}
+              </div>
+
+              {/* Items Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {category.items.map((item) => (
+                  <MenuItemCard key={item.id} item={item} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Dietary Legend */}
+        <div className="mt-24 bg-white p-8 border-2 border-brand-teal relative">
+          <div className="absolute -top-4 left-8 bg-brand-yellow px-4 py-1 border-2 border-brand-teal font-display font-bold text-brand-teal uppercase tracking-wider">
+            Element Analysis Key
+          </div>
+          <div className="flex flex-wrap justify-center gap-x-8 gap-y-4">
+            {DIETARY_ICONS.map((d) => (
+              <div key={d.name} className="flex items-center gap-3">
+                <div className="scale-75 origin-left">
+                  {React.cloneElement(d.icon as React.ReactElement, { size: 24 })}
+                </div>
+                {/* Custom handling for the generic icons vs our new component structure in the legend */}
+                {/* Note: In constants.tsx DIETARY_ICONS uses plain Lucide icons. 
+                    We are just displaying the legend here. 
+                    Let's create a visual representation that matches our new system. */}
+              </div>
+            ))}
+            
+            {/* Hardcoded Legend for consistency with new Icon system */}
+             <div className="flex items-center gap-2">
+                <DietaryIcon type="wheat" /> <span className="font-sans text-sm font-bold text-brand-teal">Gluten</span>
+             </div>
+             <div className="flex items-center gap-2">
+                <DietaryIcon type="dairy" /> <span className="font-sans text-sm font-bold text-brand-teal">Dairy</span>
+             </div>
+             <div className="flex items-center gap-2">
+                <DietaryIcon type="nut" /> <span className="font-sans text-sm font-bold text-brand-teal">Nuts</span>
+             </div>
+             <div className="flex items-center gap-2">
+                <DietaryIcon type="chilli" /> <span className="font-sans text-sm font-bold text-brand-teal">Spicy</span>
+             </div>
+              <div className="flex items-center gap-2">
+                <DietaryIcon type="egg" /> <span className="font-sans text-sm font-bold text-brand-teal">Egg</span>
+             </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  );
+};
+
+export default MenuSection;
