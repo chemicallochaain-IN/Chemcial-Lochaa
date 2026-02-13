@@ -103,10 +103,7 @@ const MenuSection: React.FC = () => {
                 <div className="scale-75 origin-left">
                   {React.cloneElement(d.icon as React.ReactElement, { size: 24 })}
                 </div>
-                {/* Custom handling for the generic icons vs our new component structure in the legend */}
-                {/* Note: In constants.tsx DIETARY_ICONS uses plain Lucide icons. 
-                    We are just displaying the legend here. 
-                    Let's create a visual representation that matches our new system. */}
+                <span className="font-sans text-sm font-bold text-brand-teal">{d.name}</span>
               </div>
             ))}
             
