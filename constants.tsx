@@ -111,7 +111,7 @@ export const CONTACT_INFO = {
   website: "chemicallochaa.in",
   socials: {
     instagram: "chemicallochaa.in",
-    zomato: "Zomato",
-    swiggy: "Swiggy"
+    zomato: "https://www.zomato.com",
+    swiggy: "https://www.swiggy.com"
   }
 };

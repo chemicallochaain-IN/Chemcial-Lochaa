@@ -24,3 +24,10 @@ export interface SocialLink {
   url: string;
   icon: React.ReactNode;
 }
+
+export interface CartItem extends MenuItem {
+  cartId: string;
+  selectedVariant?: string;
+  finalPrice: number;
+  quantity: number;
+}
