@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -14,18 +14,70 @@ import BackgroundDoodles from './components/BackgroundDoodles';
 import LoginPage from './components/LoginPage';
 import MyLab from './components/MyLab';
 import { User } from './types';
+import { supabase } from './lib/supabase';
 
 function App() {
   const [isOrderOpen, setIsOrderOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'home' | 'login' | 'mylab'>('home');
   const [user, setUser] = useState<User | null>(null);
 
-  const handleLogin = (loggedInUser: User) => {
-    setUser(loggedInUser);
-    setCurrentView('mylab');
+  // Initialize Auth Listener
+  useEffect(() => {
+    // Check active session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        fetchProfile(session.user.id, session.user.email!);
+      }
+    });
+
+    // Listen for changes (Login/Logout)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        fetchProfile(session.user.id, session.user.email!);
+        setCurrentView('mylab');
+      } else {
+        setUser(null);
+        setCurrentView('home');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchProfile = async (userId: string, email: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (data) {
+        setUser({
+          name: data.name || 'Lab Partner',
+          email: email,
+          loyaltyPoints: data.loyalty_points || 0,
+          phone: data.phone,
+          address: data.address,
+          avatar: data.avatar_url
+        });
+      } else {
+        // Fallback if profile doesn't exist yet
+        setUser({
+          name: 'Lab Partner',
+          email: email,
+          loyaltyPoints: 0
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
     setCurrentView('home');
   };
@@ -59,7 +111,7 @@ function App() {
         )}
 
         {currentView === 'login' && (
-          <LoginPage onLogin={handleLogin} />
+          <LoginPage onLogin={() => {}} /* Handled via Supabase Listener */ />
         )}
 
         {currentView === 'mylab' && user && (

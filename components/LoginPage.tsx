@@ -1,31 +1,68 @@
 import React, { useState } from 'react';
-import { Beaker, ArrowRight, UserPlus, LogIn } from 'lucide-react';
+import { Beaker, UserPlus, LogIn, AlertCircle, Loader2 } from 'lucide-react';
 import { User } from '../types';
+import { supabase } from '../lib/supabase';
 
 interface LoginPageProps {
   onLogin: (user: User) => void;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+const LoginPage: React.FC<LoginPageProps> = () => {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate API call and login
-    const mockUser: User = {
-      name: formData.name || 'Lab Partner',
-      email: formData.email,
-      loyaltyPoints: 4, // Start with some mock points for demo
-      phone: '+91 98765 43210',
-      address: '123, Science Park, Ambala City',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=crop&w=200&h=200'
-    };
-    onLogin(mockUser);
+    setLoading(true);
+    setErrorMsg(null);
+
+    try {
+      if (isSignUp) {
+        // 1. Sign Up
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+        });
+
+        if (authError) throw authError;
+
+        if (authData.user) {
+          // 2. Create Profile
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert([
+              { 
+                id: authData.user.id,
+                name: formData.name,
+                email: formData.email,
+                loyalty_points: 0 // New users start at 0
+              }
+            ]);
+            
+          if (profileError) {
+             console.error("Profile creation failed, but account created.", profileError);
+          }
+        }
+
+      } else {
+        // Sign In
+        const { error } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        });
+
+        if (error) throw error;
+      }
+    } catch (error: any) {
+      setErrorMsg(error.message || 'Authentication failed');
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,6 +84,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             {isSignUp ? 'Create your account to start earning rewards.' : 'Welcome back, scientist. Enter your credentials.'}
           </p>
         </div>
+
+        {errorMsg && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded flex items-center gap-2 text-red-600 text-sm">
+            <AlertCircle size={16} /> {errorMsg}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {isSignUp && (
@@ -80,6 +123,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             <input 
               type="password" 
               required 
+              minLength={6}
               className="w-full p-3 bg-brand-cream border border-brand-teal/20 rounded focus:outline-none focus:border-brand-teal transition-colors"
               placeholder="••••••••"
               value={formData.password}
@@ -89,9 +133,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
           <button 
             type="submit"
-            className="w-full bg-brand-teal text-white py-4 rounded font-display uppercase tracking-widest font-bold hover:bg-brand-yellow hover:text-brand-teal transition-all duration-300 shadow-md flex items-center justify-center gap-2"
+            disabled={loading}
+            className="w-full bg-brand-teal text-white py-4 rounded font-display uppercase tracking-widest font-bold hover:bg-brand-yellow hover:text-brand-teal transition-all duration-300 shadow-md flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            {isSignUp ? (
+            {loading ? (
+               <Loader2 className="animate-spin" size={20} />
+            ) : isSignUp ? (
                 <>Create Account <UserPlus size={18} /></>
             ) : (
                 <>Enter Lab <LogIn size={18} /></>
@@ -103,7 +150,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           <p className="text-sm text-gray-600 font-sans">
             {isSignUp ? 'Already have an account?' : "Don't have an account yet?"}
             <button 
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setErrorMsg(null);
+              }}
               className="ml-2 text-brand-teal font-bold hover:text-brand-yellow transition-colors underline"
             >
               {isSignUp ? 'Login Here' : 'Join Now'}
