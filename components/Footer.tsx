@@ -27,7 +27,7 @@ const Footer: React.FC = () => {
                 <Instagram size={20} />
               </a>
                <a 
-                href="mailto:contact@chemicallochaa.in" 
+                href={`mailto:${CONTACT_INFO.email}`}
                 className="bg-brand-cream text-brand-teal p-2 rounded-full hover:bg-brand-yellow transition-colors"
                 title="Email Us"
               >

@@ -108,7 +108,8 @@ export const MENU_DATA: MenuCategory[] = [
 export const CONTACT_INFO = {
   address: "Shop number-28, Sector-1, Main Market, Ambala City - 134003",
   phone: "+91 72068 79847",
-  website: "chemicallochaa.in",
+  email: "chemicallochaa.in@gmail.com",
+  website: "https://www.chemicallochaa.in/",
   socials: {
     instagram: "https://www.instagram.com/chemicallochaa.in/",
     zomato: "https://www.zomato.com/ambala/chemical-lochaa-2-ambala-locality/order",
