@@ -3,33 +3,33 @@
 declare module '*.svg' {
   import * as React from 'react';
   export const ReactComponent: React.FunctionComponent<React.SVGProps<SVGSVGElement> & { title?: string }>;
-  const src: string;
-  export default src;
+  const path: string;
+  export default path;
 }
 
 declare module '*.png' {
-  const value: string;
-  export default value;
+  const path: string;
+  export default path;
 }
 
 declare module '*.jpg' {
-  const value: string;
-  export default value;
+  const path: string;
+  export default path;
 }
 
 declare module '*.jpeg' {
-  const value: string;
-  export default value;
+  const path: string;
+  export default path;
 }
 
 declare module '*.gif' {
-  const value: string;
-  export default value;
+  const path: string;
+  export default path;
 }
 
 declare module '*.webp' {
-  const value: string;
-  export default value;
+  const path: string;
+  export default path;
 }
 
 interface ImportMetaEnv {

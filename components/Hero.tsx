@@ -1,5 +1,7 @@
 import React from 'react';
-import { Beaker } from 'lucide-react';
+import { Beaker, Instagram } from 'lucide-react';
+import { Logo } from './Logo';
+import { CONTACT_INFO } from '../constants';
 
 const Hero: React.FC = () => {
   return (
@@ -13,13 +15,7 @@ const Hero: React.FC = () => {
 
         {/* Main Logo Composition */}
         <div className="relative mb-8 mx-auto w-fit">
-           <div className="flex flex-col items-center">
-             <img 
-               src="/logo.png" 
-               alt="Chemical Lochaa Logo" 
-               className="w-full max-w-[320px] md:max-w-[450px] h-auto object-contain drop-shadow-sm"
-             />
-           </div>
+           <Logo variant="hero" />
         </div>
 
         {/* City Script */}
@@ -48,10 +44,12 @@ const Hero: React.FC = () => {
             <Beaker size={20} /> Host an Event
           </a>
           <a 
-            href="#franchise"
-            className="px-8 py-4 bg-transparent text-brand-teal font-display text-xl uppercase tracking-wider rounded border-2 border-brand-teal hover:bg-brand-yellow hover:border-brand-yellow hover:text-brand-teal transition-all duration-300"
+            href={CONTACT_INFO.socials.instagram}
+            target="_blank"
+            rel="noreferrer"
+            className="px-8 py-4 bg-transparent text-brand-teal font-display text-xl uppercase tracking-wider rounded border-2 border-brand-teal hover:bg-brand-yellow hover:border-brand-yellow hover:text-brand-teal transition-all duration-300 flex items-center justify-center gap-2"
           >
-            Partner With Us
+            <Instagram size={20} /> Instagram
           </a>
         </div>
       </div>

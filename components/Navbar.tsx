@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Menu, X, ShoppingBag, Instagram, User as UserIcon, LogIn, FlaskConical } from 'lucide-react';
 import { CONTACT_INFO } from '../constants';
 import { User } from '../types';
+import { Logo } from './Logo';
 
 interface NavbarProps {
   onOpenOrder: () => void;
@@ -45,11 +46,7 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenOrder, onNavigate, currentView, u
           
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={() => handleLinkClick('#home')}>
-            <img 
-              src="/logo.png" 
-              alt="Chemical Lochaa" 
-              className="h-16 w-auto object-contain"
-            />
+            <Logo variant="default" />
           </div>
 
           {/* Desktop Menu */}
