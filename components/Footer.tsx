@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
             </p>
             <div className="flex gap-4 pt-4">
               <a 
-                href={`https://instagram.com/${CONTACT_INFO.socials.instagram}`} 
+                href={CONTACT_INFO.socials.instagram} 
                 target="_blank" 
                 rel="noreferrer"
                 className="bg-brand-cream text-brand-teal p-2 rounded-full hover:bg-brand-yellow transition-colors"

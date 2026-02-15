@@ -41,7 +41,7 @@ const Services: React.FC = () => {
           {services.map((service, index) => (
             <div key={index} className="bg-white/5 border border-brand-yellow/30 p-8 rounded hover:bg-white/10 transition-colors group">
               <div className="bg-brand-yellow w-20 h-20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(251,173,37,0.5)]">
-                {React.cloneElement(service.icon as React.ReactElement, { className: "text-brand-teal w-10 h-10" })}
+                {React.cloneElement(service.icon as React.ReactElement<any>, { className: "text-brand-teal w-10 h-10" })}
               </div>
               <h3 className="font-display text-2xl text-brand-yellow mb-4 uppercase tracking-wide">
                 {service.title}

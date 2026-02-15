@@ -190,8 +190,8 @@ const OrderOnline: React.FC<OrderOnlineProps> = ({ isOpen, onClose }) => {
                 <div className="pt-8 w-full border-t border-dashed border-gray-200">
                     <p className="text-center text-xs uppercase font-bold text-gray-300 mb-4">Or Order via Partners</p>
                     <div className="flex gap-2 justify-center">
-                        <a href={CONTACT_INFO.socials.zomato} target="https://www.zomato.com/ambala/chemical-lochaa-2-ambala-locality/order" rel="noreferrer" className="px-4 py-2 bg-red-500 text-white rounded font-bold text-xs uppercase hover:bg-red-600 transition-colors">Zomato</a>
-                        <a href={CONTACT_INFO.socials.swiggy} target="https://www.swiggy.com/city/ambala/chemical-lochaa-jail-land-marke-ambala-city-rest1102572" rel="noreferrer" className="px-4 py-2 bg-orange-500 text-white rounded font-bold text-xs uppercase hover:bg-orange-600 transition-colors">Swiggy</a>
+                        <a href={CONTACT_INFO.socials.zomato} target="_blank" rel="noreferrer" className="px-4 py-2 bg-red-500 text-white rounded font-bold text-xs uppercase hover:bg-red-600 transition-colors">Zomato</a>
+                        <a href={CONTACT_INFO.socials.swiggy} target="_blank" rel="noreferrer" className="px-4 py-2 bg-orange-500 text-white rounded font-bold text-xs uppercase hover:bg-orange-600 transition-colors">Swiggy</a>
                     </div>
                 </div>
               </div>

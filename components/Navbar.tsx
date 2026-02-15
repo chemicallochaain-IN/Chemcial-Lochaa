@@ -48,7 +48,7 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenOrder }) => {
               
               <div className="h-6 w-[2px] bg-brand-teal/20 mx-2"></div>
               
-              <a href={`https://instagram.com/${CONTACT_INFO.socials.instagram}`} target="_blank" rel="noreferrer" className="text-brand-teal hover:text-brand-yellow transition-colors">
+              <a href={CONTACT_INFO.socials.instagram} target="_blank" rel="noreferrer" className="text-brand-teal hover:text-brand-yellow transition-colors">
                 <Instagram size={20} />
               </a>
               
@@ -94,7 +94,7 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenOrder }) => {
               </a>
             ))}
              <div className="mt-4 pt-4 border-t border-brand-teal/10 flex justify-center gap-6">
-                 <a href={`https://instagram.com/${CONTACT_INFO.socials.instagram}`} target="_blank" rel="noreferrer" className="text-brand-teal flex items-center gap-2 font-display uppercase">
+                 <a href={CONTACT_INFO.socials.instagram} target="_blank" rel="noreferrer" className="text-brand-teal flex items-center gap-2 font-display uppercase">
                     <Instagram size={20} /> Instagram
                  </a>
              </div>

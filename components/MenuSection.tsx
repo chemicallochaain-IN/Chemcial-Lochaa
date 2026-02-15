@@ -101,7 +101,7 @@ const MenuSection: React.FC = () => {
             {DIETARY_ICONS.map((d) => (
               <div key={d.name} className="flex items-center gap-3">
                 <div className="scale-75 origin-left">
-                  {React.cloneElement(d.icon as React.ReactElement, { size: 24 })}
+                  {React.cloneElement(d.icon as React.ReactElement<any>, { size: 24 })}
                 </div>
                 <span className="font-sans text-sm font-bold text-brand-teal">{d.name}</span>
               </div>

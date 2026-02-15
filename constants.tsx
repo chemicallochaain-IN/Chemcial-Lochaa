@@ -110,8 +110,8 @@ export const CONTACT_INFO = {
   phone: "+91 72068 79847",
   website: "chemicallochaa.in",
   socials: {
-    instagram: "chemicallochaa.in",
-    zomato: "https://www.zomato.com",
-    swiggy: "https://www.swiggy.com"
+    instagram: "https://www.instagram.com/chemicallochaa.in/",
+    zomato: "https://www.zomato.com/ambala/chemical-lochaa-2-ambala-locality/order",
+    swiggy: "https://www.swiggy.com/city/ambala/chemical-lochaa-jail-land-marke-ambala-city-rest1102572"
   }
 };
