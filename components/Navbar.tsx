@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { Menu, X, ShoppingBag, Instagram } from 'lucide-react';
+import { Menu, X, ShoppingBag, Instagram, User as UserIcon, LogIn, FlaskConical } from 'lucide-react';
 import { CONTACT_INFO } from '../constants';
+import { User } from '../types';
 
 interface NavbarProps {
   onOpenOrder: () => void;
+  onNavigate: (view: 'home' | 'login' | 'mylab') => void;
+  currentView: string;
+  user: User | null;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onOpenOrder }) => {
+const Navbar: React.FC<NavbarProps> = ({ onOpenOrder, onNavigate, currentView, user }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
@@ -19,13 +23,28 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenOrder }) => {
     { name: 'Blog', href: '#blog' },
   ];
 
+  const handleLinkClick = (href: string) => {
+    if (currentView !== 'home') {
+      onNavigate('home');
+      // Allow time for render then scroll
+      setTimeout(() => {
+        const element = document.querySelector(href);
+        element?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      const element = document.querySelector(href);
+      element?.scrollIntoView({ behavior: 'smooth' });
+    }
+    setIsOpen(false);
+  };
+
   return (
     <nav className="fixed w-full z-50 bg-brand-cream/90 backdrop-blur-sm border-b-2 border-brand-teal shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           
           {/* Logo */}
-          <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={() => handleLinkClick('#home')}>
             <img 
               src="/logo.png" 
               alt="Chemical Lochaa" 
@@ -37,17 +56,33 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenOrder }) => {
           <div className="hidden xl:block">
             <div className="ml-10 flex items-center space-x-6">
               {navLinks.map((link) => (
-                <a
+                <button
                   key={link.name}
-                  href={link.href}
-                  className="font-display text-lg tracking-wide text-brand-teal hover:text-brand-yellow transition-colors duration-300 uppercase"
+                  onClick={() => handleLinkClick(link.href)}
+                  className="font-display text-lg tracking-wide text-brand-teal hover:text-brand-yellow transition-colors duration-300 uppercase bg-transparent border-none cursor-pointer"
                 >
                   {link.name}
-                </a>
+                </button>
               ))}
               
               <div className="h-6 w-[2px] bg-brand-teal/20 mx-2"></div>
               
+              {user ? (
+                <button 
+                  onClick={() => onNavigate('mylab')}
+                  className={`flex items-center gap-2 font-display text-lg uppercase tracking-wide transition-colors ${currentView === 'mylab' ? 'text-brand-yellow' : 'text-brand-teal hover:text-brand-yellow'}`}
+                >
+                  <FlaskConical size={20} /> My Lab
+                </button>
+              ) : (
+                <button 
+                  onClick={() => onNavigate('login')}
+                  className={`flex items-center gap-2 font-display text-lg uppercase tracking-wide transition-colors ${currentView === 'login' ? 'text-brand-yellow' : 'text-brand-teal hover:text-brand-yellow'}`}
+                >
+                  <LogIn size={20} /> Login
+                </button>
+              )}
+
               <a href={CONTACT_INFO.socials.instagram} target="_blank" rel="noreferrer" className="text-brand-teal hover:text-brand-yellow transition-colors">
                 <Instagram size={20} />
               </a>
@@ -84,15 +119,38 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenOrder }) => {
         <div className="xl:hidden bg-brand-cream border-t border-brand-teal/20">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {navLinks.map((link) => (
-              <a
+              <button
                 key={link.name}
-                href={link.href}
-                onClick={() => setIsOpen(false)}
-                className="block px-3 py-2 rounded-md text-base font-medium font-display text-brand-teal hover:bg-brand-teal/10 hover:text-brand-yellow uppercase"
+                onClick={() => handleLinkClick(link.href)}
+                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium font-display text-brand-teal hover:bg-brand-teal/10 hover:text-brand-yellow uppercase"
               >
                 {link.name}
-              </a>
+              </button>
             ))}
+            <div className="border-t border-brand-teal/10 my-2"></div>
+            
+            {user ? (
+               <button
+                onClick={() => {
+                  onNavigate('mylab');
+                  setIsOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium font-display text-brand-teal hover:bg-brand-teal/10 hover:text-brand-yellow uppercase"
+              >
+                <FlaskConical className="inline mr-2" size={18}/> My Lab
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  onNavigate('login');
+                  setIsOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium font-display text-brand-teal hover:bg-brand-teal/10 hover:text-brand-yellow uppercase"
+              >
+                <LogIn className="inline mr-2" size={18}/> Login
+              </button>
+            )}
+
              <div className="mt-4 pt-4 border-t border-brand-teal/10 flex justify-center gap-6">
                  <a href={CONTACT_INFO.socials.instagram} target="_blank" rel="noreferrer" className="text-brand-teal flex items-center gap-2 font-display uppercase">
                     <Instagram size={20} /> Instagram

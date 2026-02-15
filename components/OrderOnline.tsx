@@ -94,7 +94,7 @@ const OrderOnline: React.FC<OrderOnlineProps> = ({ isOpen, onClose }) => {
               onClick={() => setActiveCategory(category.id)}
               className={`flex-shrink-0 px-4 py-3 text-left rounded-lg font-display uppercase tracking-wide transition-all ${
                 activeCategory === category.id 
-                  ? 'bg-brand-teal text-brand-yellow shadow-md' 
+                  ? 'bg-brand-teal text-[#f6f4f0] shadow-md' 
                   : 'text-brand-teal hover:bg-brand-teal/5'
               }`}
             >
@@ -115,9 +115,9 @@ const OrderOnline: React.FC<OrderOnlineProps> = ({ isOpen, onClose }) => {
         <div className="max-w-4xl mx-auto">
           {MENU_DATA.map(category => (
              <div key={category.id} id={category.id} className={activeCategory === category.id ? 'block' : 'hidden'}>
-               <div className="mb-6 border-b-2 border-brand-teal pb-2 flex items-baseline justify-between">
-                 <h3 className="font-display text-3xl text-brand-teal uppercase font-bold">{category.title}</h3>
-                 {category.note && <span className="text-sm text-gray-500 italic font-sans">{category.note}</span>}
+               <div className="mb-6 bg-brand-teal p-3 rounded-t-lg shadow-sm flex items-baseline justify-between border-b-4 border-brand-yellow">
+                 <h3 className="font-display text-3xl text-[#f6f4f0] uppercase font-bold">{category.title}</h3>
+                 {category.note && <span className="text-sm text-brand-yellow italic font-sans">{category.note}</span>}
                </div>
 
                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

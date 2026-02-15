@@ -72,7 +72,7 @@ const MenuSection: React.FC = () => {
             <div key={category.id} className="relative">
               {/* Category Header */}
               <div className="flex flex-col md:flex-row md:items-end gap-2 md:gap-4 mb-8 border-b-4 border-brand-teal pb-2">
-                <h3 className="font-display text-4xl text-brand-teal uppercase tracking-wide bg-brand-teal text-brand-cream px-4 py-1 inline-block transform -skew-x-12">
+                <h3 className="font-display text-4xl text-[#f6f4f0] uppercase tracking-wide bg-brand-teal px-4 py-1 inline-block transform -skew-x-12">
                   <span className="transform skew-x-12 inline-block">{category.title}</span>
                 </h3>
                 {category.note && (

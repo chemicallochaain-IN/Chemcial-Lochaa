@@ -31,3 +31,12 @@ export interface CartItem extends MenuItem {
   finalPrice: number;
   quantity: number;
 }
+
+export interface User {
+  name: string;
+  email: string;
+  avatar?: string;
+  phone?: string;
+  address?: string;
+  loyaltyPoints: number; // 1 stamp per order
+}
