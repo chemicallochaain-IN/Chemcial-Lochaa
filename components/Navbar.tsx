@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Menu, X, ShoppingBag, Instagram, User as UserIcon, LogIn, FlaskConical } from 'lucide-react';
+import { Menu, X, ShoppingBag, Instagram, User as UserIcon, LogIn, FlaskConical, LayoutDashboard } from 'lucide-react';
 import { CONTACT_INFO } from '../constants';
 import { User } from '../types';
 import { Logo } from './Logo';
 
 interface NavbarProps {
   onOpenOrder: () => void;
-  onNavigate: (view: 'home' | 'login' | 'mylab') => void;
+  onNavigate: (view: 'home' | 'login' | 'mylab' | 'admin') => void;
   currentView: string;
   user: User | null;
 }
@@ -65,12 +65,22 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenOrder, onNavigate, currentView, u
               <div className="h-6 w-[2px] bg-brand-teal/20 mx-2"></div>
               
               {user ? (
-                <button 
-                  onClick={() => onNavigate('mylab')}
-                  className={`flex items-center gap-2 font-display text-lg uppercase tracking-wide transition-colors ${currentView === 'mylab' ? 'text-brand-yellow' : 'text-brand-teal hover:text-brand-yellow'}`}
-                >
-                  <FlaskConical size={20} /> My Lab
-                </button>
+                <>
+                  <button 
+                    onClick={() => onNavigate('mylab')}
+                    className={`flex items-center gap-2 font-display text-lg uppercase tracking-wide transition-colors ${currentView === 'mylab' ? 'text-brand-yellow' : 'text-brand-teal hover:text-brand-yellow'}`}
+                  >
+                    <FlaskConical size={20} /> My Lab
+                  </button>
+                  {user.isAdmin && (
+                     <button 
+                      onClick={() => onNavigate('admin')}
+                      className={`flex items-center gap-2 font-display text-lg uppercase tracking-wide transition-colors ${currentView === 'admin' ? 'text-brand-yellow' : 'text-brand-teal hover:text-brand-yellow'}`}
+                    >
+                      <LayoutDashboard size={20} /> Admin
+                    </button>
+                  )}
+                </>
               ) : (
                 <button 
                   onClick={() => onNavigate('login')}
@@ -127,15 +137,28 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenOrder, onNavigate, currentView, u
             <div className="border-t border-brand-teal/10 my-2"></div>
             
             {user ? (
-               <button
-                onClick={() => {
-                  onNavigate('mylab');
-                  setIsOpen(false);
-                }}
-                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium font-display text-brand-teal hover:bg-brand-teal/10 hover:text-brand-yellow uppercase"
-              >
-                <FlaskConical className="inline mr-2" size={18}/> My Lab
-              </button>
+               <>
+                 <button
+                  onClick={() => {
+                    onNavigate('mylab');
+                    setIsOpen(false);
+                  }}
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium font-display text-brand-teal hover:bg-brand-teal/10 hover:text-brand-yellow uppercase"
+                >
+                  <FlaskConical className="inline mr-2" size={18}/> My Lab
+                </button>
+                {user.isAdmin && (
+                  <button
+                    onClick={() => {
+                      onNavigate('admin');
+                      setIsOpen(false);
+                    }}
+                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium font-display text-brand-teal hover:bg-brand-teal/10 hover:text-brand-yellow uppercase"
+                  >
+                    <LayoutDashboard className="inline mr-2" size={18}/> Admin Panel
+                  </button>
+                )}
+              </>
             ) : (
               <button
                 onClick={() => {

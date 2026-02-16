@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Beaker, UserPlus, LogIn, AlertCircle, Loader2 } from 'lucide-react';
+import { Beaker, UserPlus, LogIn, AlertCircle, Loader2, ShieldCheck } from 'lucide-react';
 import { User } from '../types';
 import { supabase } from '../lib/supabase';
 
 interface LoginPageProps {
   onLogin: (user: User) => void;
+  isAdminLogin?: boolean;
 }
 
-const LoginPage: React.FC<LoginPageProps> = () => {
+const LoginPage: React.FC<LoginPageProps> = ({ isAdminLogin = false }) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -23,7 +24,7 @@ const LoginPage: React.FC<LoginPageProps> = () => {
     setErrorMsg(null);
 
     try {
-      if (isSignUp) {
+      if (isSignUp && !isAdminLogin) {
         // 1. Sign Up
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: formData.email,
@@ -75,13 +76,19 @@ const LoginPage: React.FC<LoginPageProps> = () => {
       <div className="bg-white max-w-md w-full p-8 md:p-10 rounded-lg shadow-2xl border-t-8 border-brand-teal relative z-10">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-teal rounded-full mb-4 shadow-lg border-4 border-brand-cream">
-            <Beaker className="text-brand-yellow w-8 h-8" />
+            {isAdminLogin ? (
+              <ShieldCheck className="text-brand-yellow w-8 h-8" />
+            ) : (
+              <Beaker className="text-brand-yellow w-8 h-8" />
+            )}
           </div>
           <h2 className="font-display text-3xl text-brand-teal uppercase font-bold">
-            {isSignUp ? 'Join the Lab' : 'Access My Lab'}
+            {isAdminLogin ? 'Restricted Access' : (isSignUp ? 'Join the Lab' : 'Access My Lab')}
           </h2>
           <p className="text-gray-500 font-sans mt-2 text-sm">
-            {isSignUp ? 'Create your account to start earning rewards.' : 'Welcome back, scientist. Enter your credentials.'}
+            {isAdminLogin 
+              ? 'Authorized personnel only. Please verify identity.' 
+              : (isSignUp ? 'Create your account to start earning rewards.' : 'Welcome back, scientist. Enter your credentials.')}
           </p>
         </div>
 
@@ -92,7 +99,7 @@ const LoginPage: React.FC<LoginPageProps> = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {isSignUp && (
+          {isSignUp && !isAdminLogin && (
             <div className="space-y-1">
               <label className="text-xs font-bold text-brand-teal uppercase tracking-wider">Full Name</label>
               <input 
@@ -138,28 +145,30 @@ const LoginPage: React.FC<LoginPageProps> = () => {
           >
             {loading ? (
                <Loader2 className="animate-spin" size={20} />
-            ) : isSignUp ? (
+            ) : (isSignUp && !isAdminLogin) ? (
                 <>Create Account <UserPlus size={18} /></>
             ) : (
-                <>Enter Lab <LogIn size={18} /></>
+                <>{isAdminLogin ? 'Authenticate' : 'Enter Lab'} <LogIn size={18} /></>
             )}
           </button>
         </form>
 
-        <div className="mt-8 text-center border-t border-brand-teal/10 pt-6">
-          <p className="text-sm text-gray-600 font-sans">
-            {isSignUp ? 'Already have an account?' : "Don't have an account yet?"}
-            <button 
-              onClick={() => {
-                setIsSignUp(!isSignUp);
-                setErrorMsg(null);
-              }}
-              className="ml-2 text-brand-teal font-bold hover:text-brand-yellow transition-colors underline"
-            >
-              {isSignUp ? 'Login Here' : 'Join Now'}
-            </button>
-          </p>
-        </div>
+        {!isAdminLogin && (
+          <div className="mt-8 text-center border-t border-brand-teal/10 pt-6">
+            <p className="text-sm text-gray-600 font-sans">
+              {isSignUp ? 'Already have an account?' : "Don't have an account yet?"}
+              <button 
+                onClick={() => {
+                  setIsSignUp(!isSignUp);
+                  setErrorMsg(null);
+                }}
+                className="ml-2 text-brand-teal font-bold hover:text-brand-yellow transition-colors underline"
+              >
+                {isSignUp ? 'Login Here' : 'Join Now'}
+              </button>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

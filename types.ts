@@ -33,10 +33,33 @@ export interface CartItem extends MenuItem {
 }
 
 export interface User {
+  id: string; // Added ID for admin matching
   name: string;
   email: string;
   avatar?: string;
   phone?: string;
   address?: string;
   loyaltyPoints: number; // 1 stamp per order
+  isAdmin?: boolean; // New Admin Flag
+}
+
+export interface Order {
+  id: string;
+  created_at: string;
+  user_id: string;
+  guest_info: any;
+  items: CartItem[];
+  total_amount: number;
+  status: 'pending' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
+}
+
+export interface ContactMessage {
+  id: string;
+  created_at: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: string;
+  phone?: string;
 }

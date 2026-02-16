@@ -1,8 +1,12 @@
 import React from 'react';
 import { CONTACT_INFO } from '../constants';
-import { Instagram, MapPin, Phone, Mail, ExternalLink } from 'lucide-react';
+import { Instagram, MapPin, Phone, Mail, ExternalLink, LockKeyhole } from 'lucide-react';
 
-const Footer: React.FC = () => {
+interface FooterProps {
+  onNavigate: (view: 'home' | 'login' | 'mylab' | 'admin' | 'adminLogin') => void;
+}
+
+const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   return (
     <footer className="bg-brand-teal text-brand-cream pt-20 pb-10 border-t-8 border-brand-yellow">
       <div className="max-w-7xl mx-auto px-6">
@@ -89,10 +93,16 @@ const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="border-t border-brand-teal/50 pt-8 text-center">
+        <div className="border-t border-brand-teal/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="font-sans text-xs text-brand-cream/60">
             © 2025 Chemical Lochaa. All Rights Reserved. Designed with <span className="text-brand-yellow">♥</span> by The Flavour Lab.
           </p>
+          <button 
+            onClick={() => onNavigate('adminLogin')}
+            className="flex items-center gap-2 text-xs text-brand-cream/30 hover:text-brand-yellow transition-colors"
+          >
+            <LockKeyhole size={12} /> Admin Login
+          </button>
         </div>
       </div>
     </footer>
