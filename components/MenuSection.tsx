@@ -1,8 +1,9 @@
-import React from 'react';
-import { MENU_DATA, DIETARY_ICONS } from '../constants';
+import React, { useEffect, useState } from 'react';
+import { DIETARY_ICONS } from '../constants';
 import { MenuItem, MenuCategory } from '../types';
 import { VegIcon, NonVegIcon, DietaryIcon } from './Icons';
-import { Beaker } from 'lucide-react';
+import { Beaker, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 const MenuItemCard: React.FC<{ item: MenuItem }> = ({ item }) => {
   return (
@@ -51,6 +52,47 @@ const MenuItemCard: React.FC<{ item: MenuItem }> = ({ item }) => {
 };
 
 const MenuSection: React.FC = () => {
+  const [menuData, setMenuData] = useState<MenuCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMenu = async () => {
+      try {
+        // Fetch Categories
+        const { data: categories, error: catError } = await supabase
+          .from('categories')
+          .select('*')
+          .order('sort_order');
+
+        if (catError) throw catError;
+
+        // Fetch Items
+        const { data: items, error: itemError } = await supabase
+          .from('menu_items')
+          .select('*')
+          .order('sort_order');
+
+        if (itemError) throw itemError;
+
+        // Merge
+        const mergedMenu: MenuCategory[] = categories.map((cat: any) => ({
+          id: cat.id,
+          title: cat.title,
+          note: cat.note,
+          items: items.filter((item: any) => item.category_id === cat.id)
+        })).filter(cat => cat.items.length > 0); // Only show categories with items
+
+        setMenuData(mergedMenu);
+      } catch (error) {
+        console.error('Error loading menu:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMenu();
+  }, []);
+
   return (
     <section id="menu" className="py-20 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -67,30 +109,36 @@ const MenuSection: React.FC = () => {
           </p>
         </div>
 
-        <div className="space-y-16">
-          {MENU_DATA.map((category: MenuCategory) => (
-            <div key={category.id} className="relative">
-              {/* Category Header */}
-              <div className="flex flex-col md:flex-row md:items-end gap-2 md:gap-4 mb-8 border-b-4 border-brand-teal pb-2">
-                <h3 className="font-display text-4xl text-[#f6f4f0] uppercase tracking-wide bg-brand-teal px-4 py-1 inline-block transform -skew-x-12">
-                  <span className="transform skew-x-12 inline-block">{category.title}</span>
-                </h3>
-                {category.note && (
-                   <span className="font-sans text-brand-teal/70 font-medium pb-1 italic pl-2">
-                     {category.note}
-                   </span>
-                )}
-              </div>
+        {loading ? (
+          <div className="flex justify-center py-20">
+             <Loader2 className="animate-spin text-brand-teal w-12 h-12" />
+          </div>
+        ) : (
+          <div className="space-y-16">
+            {menuData.map((category: MenuCategory) => (
+              <div key={category.id} className="relative">
+                {/* Category Header */}
+                <div className="flex flex-col md:flex-row md:items-end gap-2 md:gap-4 mb-8 border-b-4 border-brand-teal pb-2">
+                  <h3 className="font-display text-4xl text-[#f6f4f0] uppercase tracking-wide bg-brand-teal px-4 py-1 inline-block transform -skew-x-12">
+                    <span className="transform skew-x-12 inline-block">{category.title}</span>
+                  </h3>
+                  {category.note && (
+                     <span className="font-sans text-brand-teal/70 font-medium pb-1 italic pl-2">
+                       {category.note}
+                     </span>
+                  )}
+                </div>
 
-              {/* Items Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {category.items.map((item) => (
-                  <MenuItemCard key={item.id} item={item} />
-                ))}
+                {/* Items Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {category.items.map((item) => (
+                    <MenuItemCard key={item.id} item={item} />
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Dietary Legend */}
         <div className="mt-24 bg-white p-8 border-2 border-brand-teal relative">

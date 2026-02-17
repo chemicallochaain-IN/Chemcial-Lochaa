@@ -4,7 +4,7 @@ import { Microscope, Telescope } from 'lucide-react';
 const About: React.FC = () => {
   return (
     <section id="story" className="py-20 relative border-t-2 border-dashed border-brand-teal/30">
-      <div className="max-w-5xl mx-auto px-6">
+      <div className="max-w-6xl mx-auto px-6">
         <div className="bg-white p-8 md:p-12 shadow-[8px_8px_0px_0px_rgba(1,68,91,1)] border-2 border-brand-teal relative overflow-hidden">
           
           {/* Decorative Corner Tape */}
@@ -27,18 +27,19 @@ const About: React.FC = () => {
               </p>
             </div>
             
-            <div className="relative h-full flex items-center justify-center min-h-[300px] border-2 border-brand-teal bg-brand-cream/50 p-6 rounded-lg">
-                {/* Abstract representation of the brothers since no image provided */}
-                <div className="relative w-full h-full flex items-center justify-center">
-                    <div className="absolute top-1/2 left-1/4 transform -translate-x-1/2 -translate-y-1/2 text-center">
-                        <Telescope size={80} className="text-brand-teal mx-auto mb-2 opacity-80" strokeWidth={1.5} />
-                        <span className="font-display text-xl text-brand-teal">The Astrophysicist</span>
-                    </div>
-                    <div className="w-[2px] h-32 bg-brand-yellow mx-4 transform rotate-12"></div>
-                    <div className="absolute top-1/2 right-1/4 transform translate-x-1/2 -translate-y-1/2 text-center">
-                        <Microscope size={80} className="text-brand-teal mx-auto mb-2 opacity-80" strokeWidth={1.5} />
-                        <span className="font-display text-xl text-brand-teal">The Forensic Scientist</span>
-                    </div>
+            <div className="relative h-full flex flex-col items-center justify-center border-4 border-brand-teal bg-brand-cream p-3 rotate-1 shadow-lg hover:rotate-0 transition-transform duration-500">
+                <div className="w-full aspect-[4/3] overflow-hidden bg-gray-200 border-b-4 border-brand-teal relative">                  
+                   <img 
+                    src="public/assets/Scientists.svg" 
+                    alt="The Scientist Brothers" 
+                    className="w-full h-full object-cover"
+                   />
+                   {/* Overlay texture for 'old photo' feel */}
+                   <div className="absolute inset-0 bg-brand-yellow/10 mix-blend-multiply pointer-events-none"></div>
+                </div>
+                <div className="pt-4 text-center">
+                    <span className="font-display text-2xl text-brand-teal uppercase tracking-wider block">The Experimenters</span>
+                    <span className="font-handwriting text-brand-teal/70 text-sm font-bold">"Science tastes better with spice."</span>
                 </div>
             </div>
           </div>

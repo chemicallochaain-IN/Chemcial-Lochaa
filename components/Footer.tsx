@@ -77,10 +77,15 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <h4 className="font-display text-xl text-white uppercase tracking-wide border-b border-brand-yellow/50 pb-2 inline-block">
               Lab Location
             </h4>
-            <div className="flex items-start gap-3">
-              <MapPin className="text-brand-yellow flex-shrink-0 mt-1 w-5 h-5" />
-              <p className="font-sans text-sm">{CONTACT_INFO.address}</p>
-            </div>
+            <a 
+              href="https://share.google/F4yb1s117HkIDCE62" 
+              target="_blank" 
+              rel="noreferrer"
+              className="flex items-start gap-3 group"
+            >
+              <MapPin className="text-brand-yellow flex-shrink-0 mt-1 w-5 h-5 group-hover:text-white transition-colors" />
+              <p className="font-sans text-sm group-hover:text-brand-yellow transition-colors underline decoration-brand-yellow/30 underline-offset-4">{CONTACT_INFO.address}</p>
+            </a>
             <div className="flex items-center gap-3">
               <Phone className="text-brand-yellow flex-shrink-0 w-5 h-5" />
               <p className="font-sans text-sm tracking-wide">{CONTACT_INFO.phone}</p>

@@ -14,6 +14,7 @@ import BackgroundDoodles from './components/BackgroundDoodles';
 import LoginPage from './components/LoginPage';
 import MyLab from './components/MyLab';
 import AdminDashboard from './components/AdminDashboard';
+import FeedbackSection from './components/FeedbackSection';
 import { User } from './types';
 import { supabase } from './lib/supabase';
 
@@ -124,6 +125,7 @@ function App() {
             <Gallery />
             <Franchise />
             <Blog />
+            <FeedbackSection user={user} />
             <Contact />
           </>
         )}

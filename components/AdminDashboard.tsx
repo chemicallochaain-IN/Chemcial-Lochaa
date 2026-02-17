@@ -2,17 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, ShoppingBag, Users, UtensilsCrossed, 
   MessageSquare, BarChart3, Settings, Search, CheckCircle, 
-  XCircle, Clock, ChefHat, Truck, Edit2, Plus, Trash2, Gift, Shirt, Calendar
+  XCircle, Clock, ChefHat, Truck, Edit2, Plus, Trash2, Gift, Shirt, Calendar, UserPlus, Shield
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { User, Order, ContactMessage, MenuItem } from '../types';
-import { MENU_DATA } from '../constants';
+import { User, Order, ContactMessage, MenuCategory, MenuItem } from '../types';
 
 interface AdminDashboardProps {
   user: User;
 }
 
-type TabType = 'dashboard' | 'orders' | 'menu' | 'customers' | 'messages' | 'merch' | 'events' | 'rewards';
+type TabType = 'dashboard' | 'orders' | 'menu' | 'customers' | 'team' | 'messages' | 'merch' | 'events' | 'rewards';
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
@@ -20,6 +19,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [customers, setCustomers] = useState<User[]>([]);
+  const [employees, setEmployees] = useState<User[]>([]);
+  const [menuData, setMenuData] = useState<MenuCategory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // --- Data Fetching ---
@@ -28,7 +29,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
     if (activeTab === 'dashboard') fetchStats();
     if (activeTab === 'orders') fetchOrders();
     if (activeTab === 'customers') fetchCustomers();
+    if (activeTab === 'team') fetchEmployees();
     if (activeTab === 'messages') fetchMessages();
+    if (activeTab === 'menu') fetchMenu();
   }, [activeTab]);
 
   const fetchStats = async () => {
@@ -57,7 +60,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
 
   const fetchCustomers = async () => {
     setIsLoading(true);
-    const { data, error } = await supabase.from('profiles').select('*');
+    const { data, error } = await supabase.from('profiles').select('*').eq('is_admin', false);
     if (!error && data) {
       setCustomers(data.map(p => ({
         id: p.id,
@@ -71,10 +74,49 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
     setIsLoading(false);
   };
 
+  const fetchEmployees = async () => {
+    setIsLoading(true);
+    // Fetch profiles that are admins
+    const { data, error } = await supabase.from('profiles').select('*').eq('is_admin', true);
+    if (!error && data) {
+      setEmployees(data.map(p => ({
+        id: p.id,
+        name: p.name || 'Unknown',
+        email: p.email,
+        loyaltyPoints: 0,
+        phone: p.phone,
+        avatar: p.avatar_url,
+        isAdmin: true
+      })));
+    }
+    setIsLoading(false);
+  };
+
   const fetchMessages = async () => {
     setIsLoading(true);
     const { data, error } = await supabase.from('contact_messages').select('*').order('created_at', { ascending: false });
     if (!error && data) setMessages(data);
+    setIsLoading(false);
+  };
+
+  const fetchMenu = async () => {
+    setIsLoading(true);
+    try {
+      const { data: categories } = await supabase.from('categories').select('*').order('sort_order');
+      const { data: items } = await supabase.from('menu_items').select('*').order('sort_order');
+
+      if (categories && items) {
+        const mergedMenu: MenuCategory[] = categories.map((cat: any) => ({
+          id: cat.id,
+          title: cat.title,
+          note: cat.note,
+          items: items.filter((item: any) => item.category_id === cat.id)
+        }));
+        setMenuData(mergedMenu);
+      }
+    } catch (e) {
+      console.error(e);
+    }
     setIsLoading(false);
   };
 
@@ -209,12 +251,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
       </div>
 
       <div className="bg-white p-6 rounded-lg border border-brand-teal/20">
-         <p className="text-sm text-gray-500 mb-4 bg-yellow-50 p-3 rounded border border-yellow-200">
-           Note: This view currently reflects the hardcoded menu constants. To enable full CRUD, the frontend must be refactored to fetch menu items exclusively from the Supabase `menu_items` table.
-         </p>
-         
          <div className="space-y-8">
-            {MENU_DATA.map(cat => (
+            {menuData.length === 0 ? <p className="text-gray-500">No menu items found. Seed database or add items.</p> : null}
+            {menuData.map(cat => (
               <div key={cat.id}>
                 <h3 className="font-bold text-xl text-brand-teal border-b border-gray-200 pb-2 mb-4">{cat.title}</h3>
                 <div className="grid gap-4">
@@ -227,7 +266,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
                        <div className="flex items-center gap-4">
                           <span className="font-mono font-bold text-brand-teal">₹{item.price}</span>
                           <button className="p-1.5 hover:bg-brand-teal hover:text-white rounded text-gray-400"><Edit2 size={14}/></button>
-                          <button className="p-1.5 hover:bg-red-500 hover:text-white rounded text-gray-400"><Trash2 size={14}/></button>
+                          <button 
+                            className="p-1.5 hover:bg-red-500 hover:text-white rounded text-gray-400"
+                            onClick={async () => {
+                                if(confirm('Delete this item?')) {
+                                    await supabase.from('menu_items').delete().eq('id', item.id);
+                                    fetchMenu();
+                                }
+                            }}
+                          ><Trash2 size={14}/></button>
                        </div>
                     </div>
                   ))}
@@ -238,6 +285,118 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
       </div>
     </div>
   );
+
+  const TeamTab = () => {
+    const [isAdding, setIsAdding] = useState(false);
+    const [newEmployee, setNewEmployee] = useState({ name: '', email: '', password: '', isAdmin: false });
+
+    const handleCreateEmployee = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            // Using RPC function to create user without logging out admin
+            const { error } = await supabase.rpc('create_employee', {
+                email: newEmployee.email,
+                password: newEmployee.password,
+                full_name: newEmployee.name,
+                is_admin_role: newEmployee.isAdmin
+            });
+
+            if (error) throw error;
+            
+            alert('User created successfully');
+            setIsAdding(false);
+            setNewEmployee({ name: '', email: '', password: '', isAdmin: false });
+            fetchEmployees();
+        } catch (err: any) {
+            alert(err.message);
+        }
+    };
+
+    return (
+        <div className="space-y-6 animate-in fade-in">
+            <div className="flex justify-between items-center">
+                <h2 className="font-display text-3xl text-brand-teal uppercase">Lab Scientists (Team)</h2>
+                <button 
+                    onClick={() => setIsAdding(!isAdding)}
+                    className="bg-brand-teal text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-brand-yellow hover:text-brand-teal transition-colors"
+                >
+                    <UserPlus size={16} /> {isAdding ? 'Cancel' : 'New Member'}
+                </button>
+            </div>
+
+            {isAdding && (
+                <div className="bg-brand-cream p-6 rounded-lg border border-brand-teal/20 mb-6">
+                    <h3 className="font-bold text-lg mb-4 text-brand-teal">Register New Employee</h3>
+                    <form onSubmit={handleCreateEmployee} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input 
+                            placeholder="Full Name" 
+                            className="p-2 border rounded" 
+                            required 
+                            value={newEmployee.name}
+                            onChange={e => setNewEmployee({...newEmployee, name: e.target.value})}
+                        />
+                        <input 
+                            placeholder="Email" 
+                            type="email" 
+                            className="p-2 border rounded" 
+                            required
+                            value={newEmployee.email}
+                            onChange={e => setNewEmployee({...newEmployee, email: e.target.value})}
+                        />
+                        <input 
+                            placeholder="Password" 
+                            type="password" 
+                            className="p-2 border rounded" 
+                            required
+                            minLength={6}
+                            value={newEmployee.password}
+                            onChange={e => setNewEmployee({...newEmployee, password: e.target.value})}
+                        />
+                         <div className="flex items-center gap-2 bg-white p-2 border rounded">
+                            <input 
+                                type="checkbox" 
+                                id="adminCheck"
+                                checked={newEmployee.isAdmin}
+                                onChange={e => setNewEmployee({...newEmployee, isAdmin: e.target.checked})}
+                            />
+                            <label htmlFor="adminCheck" className="text-sm font-bold text-gray-700">Grant Admin Privileges</label>
+                        </div>
+                        <button type="submit" className="md:col-span-2 bg-brand-yellow text-brand-teal font-bold py-2 rounded hover:bg-brand-teal hover:text-white transition-colors">Create Account</button>
+                    </form>
+                </div>
+            )}
+
+            <div className="bg-white rounded-lg border border-brand-teal/20 overflow-hidden">
+                <table className="w-full text-left text-sm">
+                    <thead className="bg-brand-cream text-brand-teal uppercase font-display border-b border-brand-teal/10">
+                        <tr>
+                            <th className="p-4">Name</th>
+                            <th className="p-4">Email</th>
+                            <th className="p-4">Role</th>
+                            <th className="p-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                        {employees.map(emp => (
+                            <tr key={emp.id}>
+                                <td className="p-4 font-bold text-brand-teal">{emp.name}</td>
+                                <td className="p-4">{emp.email}</td>
+                                <td className="p-4">
+                                    <span className="flex items-center gap-1 px-2 py-1 bg-brand-teal text-white text-xs rounded-full w-fit">
+                                        <Shield size={12} /> Admin
+                                    </span>
+                                </td>
+                                <td className="p-4">
+                                    <button className="text-red-500 hover:underline text-xs" title="Requires Super Admin (Manual DB deletion for safety)">Remove</button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+  };
 
   const CustomersTab = () => (
     <div className="space-y-6 animate-in fade-in">
@@ -328,6 +487,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
             { id: 'orders', label: 'Live Orders', icon: ShoppingBag },
             { id: 'menu', label: 'Menu & Prices', icon: UtensilsCrossed },
             { id: 'customers', label: 'Customers', icon: Users },
+            { id: 'team', label: 'Team', icon: Users },
             { id: 'messages', label: 'Communications', icon: MessageSquare },
             { id: 'merch', label: 'Merchandise', icon: Shirt },
             { id: 'events', label: 'Events', icon: Calendar },
@@ -361,6 +521,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
             {activeTab === 'orders' && <OrdersTab />}
             {activeTab === 'menu' && <MenuTab />}
             {activeTab === 'customers' && <CustomersTab />}
+            {activeTab === 'team' && <TeamTab />}
             {activeTab === 'messages' && <MessagesTab />}
             {activeTab === 'merch' && <PlaceholderTab title="Merchandise" icon={Shirt} />}
             {activeTab === 'events' && <PlaceholderTab title="Events" icon={Calendar} />}

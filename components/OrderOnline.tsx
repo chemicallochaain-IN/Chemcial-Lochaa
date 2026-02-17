@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Minus, ShoppingBag, Trash2, ChevronRight, CheckCircle } from 'lucide-react';
-import { MENU_DATA, CONTACT_INFO } from '../constants';
-import { MenuItem, CartItem } from '../types';
+import { X, Plus, Minus, ShoppingBag, Trash2, ChevronRight, CheckCircle, Loader2 } from 'lucide-react';
+import { CONTACT_INFO } from '../constants';
+import { MenuItem, CartItem, MenuCategory } from '../types';
 import { VegIcon, NonVegIcon } from './Icons';
+import { supabase } from '../lib/supabase';
 
 interface OrderOnlineProps {
   isOpen: boolean;
@@ -11,9 +12,39 @@ interface OrderOnlineProps {
 
 const OrderOnline: React.FC<OrderOnlineProps> = ({ isOpen, onClose }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [activeCategory, setActiveCategory] = useState(MENU_DATA[0].id);
+  const [activeCategory, setActiveCategory] = useState('');
   const [showCheckout, setShowCheckout] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [menuData, setMenuData] = useState<MenuCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch Menu on Load
+  useEffect(() => {
+    const fetchMenu = async () => {
+      try {
+        const { data: categories } = await supabase.from('categories').select('*').order('sort_order');
+        const { data: items } = await supabase.from('menu_items').select('*').order('sort_order');
+
+        if (categories && items) {
+          const mergedMenu: MenuCategory[] = categories.map((cat: any) => ({
+            id: cat.id,
+            title: cat.title,
+            note: cat.note,
+            items: items.filter((item: any) => item.category_id === cat.id)
+          })).filter(cat => cat.items.length > 0);
+
+          setMenuData(mergedMenu);
+          if (mergedMenu.length > 0) setActiveCategory(mergedMenu[0].id);
+        }
+      } catch (error) {
+        console.error("Error loading menu", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (isOpen && menuData.length === 0) fetchMenu();
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -80,89 +111,97 @@ const OrderOnline: React.FC<OrderOnlineProps> = ({ isOpen, onClose }) => {
         <button onClick={onClose}><X /></button>
       </div>
 
-      {/* Sidebar Navigation (Desktop) / Top Bar (Mobile) */}
-      <div className="w-full md:w-64 bg-brand-cream border-r border-brand-teal/20 flex-shrink-0 md:h-full overflow-x-auto md:overflow-y-auto no-scrollbar flex md:flex-col">
-        <div className="hidden md:flex justify-between items-center p-6 border-b border-brand-teal/10">
-          <h2 className="font-display text-2xl text-brand-teal uppercase font-bold">Menu</h2>
-          <button onClick={onClose} className="p-1 hover:bg-brand-teal/10 rounded-full transition-colors"><X size={20} /></button>
+      {loading ? (
+         <div className="flex-1 flex justify-center items-center">
+            <Loader2 className="animate-spin text-brand-teal" size={40} />
+         </div>
+      ) : (
+        <>
+        {/* Sidebar Navigation (Desktop) / Top Bar (Mobile) */}
+        <div className="w-full md:w-64 bg-brand-cream border-r border-brand-teal/20 flex-shrink-0 md:h-full overflow-x-auto md:overflow-y-auto no-scrollbar flex md:flex-col">
+            <div className="hidden md:flex justify-between items-center p-6 border-b border-brand-teal/10">
+            <h2 className="font-display text-2xl text-brand-teal uppercase font-bold">Menu</h2>
+            <button onClick={onClose} className="p-1 hover:bg-brand-teal/10 rounded-full transition-colors"><X size={20} /></button>
+            </div>
+            
+            <div className="flex md:flex-col p-2 md:p-4 gap-2">
+            {menuData.map(category => (
+                <button
+                key={category.id}
+                onClick={() => setActiveCategory(category.id)}
+                className={`flex-shrink-0 px-4 py-3 text-left rounded-lg font-display uppercase tracking-wide transition-all ${
+                    activeCategory === category.id 
+                    ? 'bg-brand-teal text-[#f6f4f0] shadow-md' 
+                    : 'text-brand-teal hover:bg-brand-teal/5'
+                }`}
+                >
+                {category.title}
+                </button>
+            ))}
+            </div>
+            
+            <div className="hidden md:block mt-auto p-6 border-t border-brand-teal/10">
+                <p className="text-xs text-brand-teal/60 font-sans text-center">
+                    Powered by Chemical Lochaa POS
+                </p>
+            </div>
         </div>
-        
-        <div className="flex md:flex-col p-2 md:p-4 gap-2">
-          {MENU_DATA.map(category => (
-            <button
-              key={category.id}
-              onClick={() => setActiveCategory(category.id)}
-              className={`flex-shrink-0 px-4 py-3 text-left rounded-lg font-display uppercase tracking-wide transition-all ${
-                activeCategory === category.id 
-                  ? 'bg-brand-teal text-[#f6f4f0] shadow-md' 
-                  : 'text-brand-teal hover:bg-brand-teal/5'
-              }`}
-            >
-              {category.title}
-            </button>
-          ))}
-        </div>
-        
-        <div className="hidden md:block mt-auto p-6 border-t border-brand-teal/10">
-            <p className="text-xs text-brand-teal/60 font-sans text-center">
-                Powered by Chemical Lochaa POS
-            </p>
-        </div>
-      </div>
 
-      {/* Main Menu Content */}
-      <div className="flex-1 overflow-y-auto bg-white p-4 md:p-8 pb-32 md:pb-8 relative">
-        <div className="max-w-4xl mx-auto">
-          {MENU_DATA.map(category => (
-             <div key={category.id} id={category.id} className={activeCategory === category.id ? 'block' : 'hidden'}>
-               <div className="mb-6 bg-brand-teal p-3 rounded-t-lg shadow-sm flex items-baseline justify-between border-b-4 border-brand-yellow">
-                 <h3 className="font-display text-3xl text-[#f6f4f0] uppercase font-bold">{category.title}</h3>
-                 {category.note && <span className="text-sm text-brand-yellow italic font-sans">{category.note}</span>}
-               </div>
+        {/* Main Menu Content */}
+        <div className="flex-1 overflow-y-auto bg-white p-4 md:p-8 pb-32 md:pb-8 relative">
+            <div className="max-w-4xl mx-auto">
+            {menuData.map(category => (
+                <div key={category.id} id={category.id} className={activeCategory === category.id ? 'block' : 'hidden'}>
+                <div className="mb-6 bg-brand-teal p-3 rounded-t-lg shadow-sm flex items-baseline justify-between border-b-4 border-brand-yellow">
+                    <h3 className="font-display text-3xl text-[#f6f4f0] uppercase font-bold">{category.title}</h3>
+                    {category.note && <span className="text-sm text-brand-yellow italic font-sans">{category.note}</span>}
+                </div>
 
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                 {category.items.map(item => (
-                   <div key={item.id} className="border border-brand-teal/20 rounded-lg p-4 hover:border-brand-yellow transition-colors bg-brand-cream/20 flex justify-between gap-4">
-                     <div className="flex-1">
-                        <div className="flex items-start gap-2 mb-1">
-                          <div className="mt-1">{item.type === 'veg' ? <VegIcon /> : item.type === 'non-veg' ? <NonVegIcon /> : <div className="flex gap-1"><VegIcon/><NonVegIcon/></div>}</div>
-                          <h4 className="font-bold text-brand-teal font-display text-lg leading-tight uppercase">{item.name}</h4>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {category.items.map(item => (
+                    <div key={item.id} className="border border-brand-teal/20 rounded-lg p-4 hover:border-brand-yellow transition-colors bg-brand-cream/20 flex justify-between gap-4">
+                        <div className="flex-1">
+                            <div className="flex items-start gap-2 mb-1">
+                            <div className="mt-1">{item.type === 'veg' ? <VegIcon /> : item.type === 'non-veg' ? <NonVegIcon /> : <div className="flex gap-1"><VegIcon/><NonVegIcon/></div>}</div>
+                            <h4 className="font-bold text-brand-teal font-display text-lg leading-tight uppercase">{item.name}</h4>
+                            </div>
+                            <p className="text-xs text-gray-500 font-sans mb-2 line-clamp-2">{item.description}</p>
+                            <div className="font-bold text-brand-teal font-sans">
+                            ₹{item.price}
+                            </div>
                         </div>
-                        <p className="text-xs text-gray-500 font-sans mb-2 line-clamp-2">{item.description}</p>
-                        <div className="font-bold text-brand-teal font-sans">
-                           ₹{item.price}
+                        <div className="flex flex-col items-end justify-center">
+                        {/* Handling Variant Prices simply for this demo */}
+                            {typeof item.price === 'string' && item.price.includes('/') ? (
+                            <div className="flex flex-col gap-2">
+                                {item.price.split('/').map((p, idx) => (
+                                <button 
+                                    key={idx}
+                                    onClick={() => addToCart(item, idx === 0 ? 'Regular' : 'Large', parseInt(p.trim()))}
+                                    className="px-3 py-1 bg-white border border-brand-teal text-brand-teal text-xs font-bold uppercase rounded hover:bg-brand-teal hover:text-white transition-colors"
+                                >
+                                    Add {idx === 0 ? 'Reg' : 'Lrg'}
+                                </button>
+                                ))}
+                            </div>
+                            ) : (
+                            <button 
+                                onClick={() => addToCart(item)}
+                                className="w-8 h-8 flex items-center justify-center bg-brand-teal text-white rounded-full hover:bg-brand-yellow hover:text-brand-teal transition-colors shadow-sm"
+                            >
+                                <Plus size={18} />
+                            </button>
+                            )}
                         </div>
-                     </div>
-                     <div className="flex flex-col items-end justify-center">
-                       {/* Handling Variant Prices simply for this demo */}
-                        {typeof item.price === 'string' ? (
-                          <div className="flex flex-col gap-2">
-                             {item.price.split('/').map((p, idx) => (
-                               <button 
-                                key={idx}
-                                onClick={() => addToCart(item, idx === 0 ? 'Regular' : 'Large', parseInt(p.trim()))}
-                                className="px-3 py-1 bg-white border border-brand-teal text-brand-teal text-xs font-bold uppercase rounded hover:bg-brand-teal hover:text-white transition-colors"
-                               >
-                                 Add {idx === 0 ? 'Reg' : 'Lrg'}
-                               </button>
-                             ))}
-                          </div>
-                        ) : (
-                          <button 
-                            onClick={() => addToCart(item)}
-                            className="w-8 h-8 flex items-center justify-center bg-brand-teal text-white rounded-full hover:bg-brand-yellow hover:text-brand-teal transition-colors shadow-sm"
-                          >
-                            <Plus size={18} />
-                          </button>
-                        )}
-                     </div>
-                   </div>
-                 ))}
-               </div>
-             </div>
-          ))}
+                    </div>
+                    ))}
+                </div>
+                </div>
+            ))}
+            </div>
         </div>
-      </div>
+        </>
+      )}
 
       {/* Cart Sidebar */}
       <div className={`fixed md:relative bottom-0 left-0 right-0 md:w-96 bg-white border-l border-brand-teal/20 shadow-2xl md:shadow-none transform transition-transform duration-300 z-50 flex flex-col ${showCheckout ? 'h-full md:h-auto' : 'h-auto max-h-[80vh] md:h-full'}`}>
