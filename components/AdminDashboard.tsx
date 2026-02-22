@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard, ShoppingBag, Users, UtensilsCrossed,
   MessageSquare, BarChart3, Settings, Search, CheckCircle,
-  XCircle, Clock, ChefHat, Truck, Edit2, Plus, Trash2, Gift, Shirt, Calendar, UserPlus, Shield, FolderPlus
+  XCircle, Clock, ChefHat, Truck, Edit2, Plus, Trash2, Gift, Shirt, Calendar, UserPlus, Shield, FolderPlus, Send
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { User, Order, ContactMessage, MenuCategory, MenuItem } from '../types';
@@ -339,7 +339,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
                     </div>
                     <div className="flex items-center gap-4">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${item.type === 'veg' ? 'bg-green-100 text-green-700' :
-                          item.type === 'non-veg' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+                        item.type === 'non-veg' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
                         }`}>{item.type}</span>
                       <span className="font-mono font-bold text-brand-teal">₹{item.price}</span>
                       <button
@@ -537,32 +537,115 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
     </div>
   );
 
-  const MessagesTab = () => (
-    <div className="space-y-6 animate-in fade-in">
-      <h2 className="font-display text-3xl text-brand-teal uppercase">Communications</h2>
-      <div className="space-y-4">
-        {messages.map(msg => (
-          <div key={msg.id} className="bg-white p-6 rounded-lg border border-brand-teal/20 shadow-sm">
-            <div className="flex justify-between items-start mb-2">
-              <h3 className="font-bold text-lg text-brand-teal">{msg.subject}</h3>
-              <span className="text-xs text-gray-500">{new Date(msg.created_at).toLocaleDateString()}</span>
+  const MessagesTab = () => {
+    const [replySuccess, setReplySuccess] = useState<string | null>(null);
+
+    const updateMessageStatus = async (id: string, status: string) => {
+      await supabase.from('contact_messages').update({ status }).eq('id', id);
+      fetchMessages();
+    };
+
+    const getWhatsAppLink = (phone: string, msg: ContactMessage) => {
+      // Strip non-digit chars except leading +
+      const cleanPhone = phone.replace(/[^0-9]/g, '');
+      const text = encodeURIComponent(
+        `Hi ${msg.name},\n\nThank you for contacting Chemical Lochaa regarding "${msg.subject}".\n\n`
+      );
+      return `https://wa.me/${cleanPhone}?text=${text}`;
+    };
+
+    const handleWhatsAppReply = async (msg: ContactMessage) => {
+      if (!msg.phone) {
+        alert('No phone number available for this contact.');
+        return;
+      }
+      // Open WhatsApp with pre-filled message
+      window.open(getWhatsAppLink(msg.phone, msg), '_blank');
+      // Mark as replied
+      await updateMessageStatus(msg.id, 'replied');
+      setReplySuccess(msg.id);
+      setTimeout(() => setReplySuccess(null), 3000);
+    };
+
+    const getStatusBadge = (status: string) => {
+      switch (status) {
+        case 'new':
+          return <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 uppercase">New</span>;
+        case 'read':
+          return <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-gray-200 text-gray-600 uppercase">Read</span>;
+        case 'replied':
+          return <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700 uppercase flex items-center gap-1"><CheckCircle size={10} /> Replied</span>;
+        default:
+          return <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-500 uppercase">{status}</span>;
+      }
+    };
+
+    return (
+      <div className="space-y-6 animate-in fade-in">
+        <div className="flex justify-between items-center">
+          <h2 className="font-display text-3xl text-brand-teal uppercase">Communications</h2>
+          <button onClick={fetchMessages} className="text-sm underline">Refresh</button>
+        </div>
+        <div className="space-y-4">
+          {messages.map(msg => (
+            <div key={msg.id} className={`bg-white p-6 rounded-lg border shadow-sm transition-all ${msg.status === 'new' ? 'border-blue-300 border-l-4' :
+              msg.status === 'replied' ? 'border-green-200' : 'border-brand-teal/20'
+              }`}>
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex items-center gap-3">
+                  <h3 className="font-bold text-lg text-brand-teal">{msg.subject}</h3>
+                  {getStatusBadge(msg.status)}
+                </div>
+                <span className="text-xs text-gray-500">{new Date(msg.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
+                <span className="font-bold">{msg.name}</span>
+                <span>&lt;{msg.email}&gt;</span>
+                {msg.phone && <span>• 📱 {msg.phone}</span>}
+              </div>
+              <p className="text-gray-700 bg-gray-50 p-4 rounded border border-gray-100 whitespace-pre-wrap">{msg.message}</p>
+
+              {/* Reply Success Toast */}
+              {replySuccess === msg.id && (
+                <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded text-green-700 text-sm flex items-center gap-2 animate-in fade-in">
+                  <CheckCircle size={16} /> WhatsApp opened for {msg.name}
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="mt-4 flex gap-2">
+                {msg.phone && (
+                  <button
+                    onClick={() => handleWhatsAppReply(msg)}
+                    className="text-xs bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition-colors font-bold flex items-center gap-1"
+                  >
+                    <MessageSquare size={12} /> Reply via WhatsApp
+                  </button>
+                )}
+                {!msg.phone && msg.email && (
+                  <a
+                    href={`mailto:${msg.email}?subject=Re: ${msg.subject} — Chemical Lochaa`}
+                    className="text-xs bg-brand-teal text-white px-3 py-1.5 rounded hover:bg-brand-yellow hover:text-brand-teal transition-colors font-bold flex items-center gap-1"
+                  >
+                    <MessageSquare size={12} /> Reply via Email
+                  </a>
+                )}
+                {msg.status === 'new' && (
+                  <button
+                    onClick={() => updateMessageStatus(msg.id, 'read')}
+                    className="text-xs border border-gray-300 px-3 py-1.5 rounded hover:bg-gray-50"
+                  >
+                    Mark as Read
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-              <span className="font-bold">{msg.name}</span>
-              <span>&lt;{msg.email}&gt;</span>
-              {msg.phone && <span>• {msg.phone}</span>}
-            </div>
-            <p className="text-gray-700 bg-gray-50 p-4 rounded border border-gray-100">{msg.message}</p>
-            <div className="mt-4 flex gap-2">
-              <a href={`mailto:${msg.email}`} className="text-xs bg-brand-teal text-white px-3 py-1.5 rounded hover:bg-brand-yellow hover:text-brand-teal transition-colors">Reply via Email</a>
-              <button className="text-xs border border-gray-300 px-3 py-1.5 rounded hover:bg-gray-50">Mark as Read</button>
-            </div>
-          </div>
-        ))}
-        {messages.length === 0 && <p className="text-gray-500 italic">No messages found.</p>}
+          ))}
+          {messages.length === 0 && <p className="text-gray-500 italic">No messages found.</p>}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Placeholder for extra tabs
   const PlaceholderTab = ({ title, icon: Icon }: any) => (
@@ -597,8 +680,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
               key={item.id}
               onClick={() => setActiveTab(item.id as TabType)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === item.id
-                  ? 'bg-brand-yellow text-brand-teal font-bold'
-                  : 'hover:bg-white/10 text-brand-cream'
+                ? 'bg-brand-yellow text-brand-teal font-bold'
+                : 'hover:bg-white/10 text-brand-cream'
                 }`}
             >
               <item.icon size={18} />
