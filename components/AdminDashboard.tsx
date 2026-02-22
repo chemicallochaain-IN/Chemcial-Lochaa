@@ -2,18 +2,23 @@ import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard, ShoppingBag, Users, UtensilsCrossed,
   MessageSquare, BarChart3, Settings, Search, CheckCircle,
-  XCircle, Clock, ChefHat, Truck, Edit2, Plus, Trash2, Gift, Shirt, Calendar, UserPlus, Shield, FolderPlus, Send
+  XCircle, Clock, ChefHat, Truck, Edit2, Plus, Trash2, Gift, Shirt, Calendar, UserPlus, Shield, FolderPlus, Send, FileText, Store
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { User, Order, ContactMessage, MenuCategory, MenuItem } from '../types';
 import MenuItemForm from './MenuItemForm';
 import CategoryForm from './CategoryForm';
+import BlogTab from './admin/BlogTab';
+import RewardsTab from './admin/RewardsTab';
+import MerchTab from './admin/MerchTab';
+import EventsTab from './admin/EventsTab';
+import FranchiseTab from './admin/FranchiseTab';
 
 interface AdminDashboardProps {
   user: User;
 }
 
-type TabType = 'dashboard' | 'orders' | 'menu' | 'customers' | 'team' | 'messages' | 'merch' | 'events' | 'rewards';
+type TabType = 'dashboard' | 'orders' | 'menu' | 'customers' | 'team' | 'messages' | 'merch' | 'events' | 'rewards' | 'blog' | 'franchise';
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
@@ -539,6 +544,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
 
   const MessagesTab = () => {
     const [replySuccess, setReplySuccess] = useState<string | null>(null);
+    const [msgFilter, setMsgFilter] = useState('all');
+
+    const MESSAGE_CATEGORIES = ['all', 'Book an Event / Party', 'Franchise Enquiry', 'Feedback', 'Other'];
+    const filteredMessages = msgFilter === 'all' ? messages : messages.filter(m => m.subject === msgFilter);
+    const getCategoryCount = (cat: string) => cat === 'all' ? messages.length : messages.filter(m => m.subject === cat).length;
 
     const updateMessageStatus = async (id: string, status: string) => {
       await supabase.from('contact_messages').update({ status }).eq('id', id);
@@ -546,7 +556,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
     };
 
     const getWhatsAppLink = (phone: string, msg: ContactMessage) => {
-      // Strip non-digit chars except leading +
       const cleanPhone = phone.replace(/[^0-9]/g, '');
       const text = encodeURIComponent(
         `Hi ${msg.name},\n\nThank you for contacting Chemical Lochaa regarding "${msg.subject}".\n\n`
@@ -559,9 +568,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
         alert('No phone number available for this contact.');
         return;
       }
-      // Open WhatsApp with pre-filled message
       window.open(getWhatsAppLink(msg.phone, msg), '_blank');
-      // Mark as replied
       await updateMessageStatus(msg.id, 'replied');
       setReplySuccess(msg.id);
       setTimeout(() => setReplySuccess(null), 3000);
@@ -586,8 +593,20 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
           <h2 className="font-display text-3xl text-brand-teal uppercase">Communications</h2>
           <button onClick={fetchMessages} className="text-sm underline">Refresh</button>
         </div>
+
+        {/* Category Filter Tabs */}
+        <div className="flex gap-2 flex-wrap">
+          {MESSAGE_CATEGORIES.map(cat => (
+            <button key={cat} onClick={() => setMsgFilter(cat)}
+              className={`px-3 py-1.5 rounded text-xs font-bold transition-colors ${msgFilter === cat ? 'bg-brand-teal text-white' : 'bg-white border hover:bg-gray-50'}`}
+            >
+              {cat === 'all' ? 'All' : cat} ({getCategoryCount(cat)})
+            </button>
+          ))}
+        </div>
+
         <div className="space-y-4">
-          {messages.map(msg => (
+          {filteredMessages.map(msg => (
             <div key={msg.id} className={`bg-white p-6 rounded-lg border shadow-sm transition-all ${msg.status === 'new' ? 'border-blue-300 border-l-4' :
               msg.status === 'replied' ? 'border-green-200' : 'border-brand-teal/20'
               }`}>
@@ -669,12 +688,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
             { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
             { id: 'orders', label: 'Live Orders', icon: ShoppingBag },
             { id: 'menu', label: 'Menu & Prices', icon: UtensilsCrossed },
+            { id: 'blog', label: 'Blog', icon: FileText },
             { id: 'customers', label: 'Customers', icon: Users },
             { id: 'team', label: 'Team', icon: Users },
             { id: 'messages', label: 'Communications', icon: MessageSquare },
             { id: 'merch', label: 'Merchandise', icon: Shirt },
             { id: 'events', label: 'Events', icon: Calendar },
             { id: 'rewards', label: 'Rewards', icon: Gift },
+            { id: 'franchise', label: 'Franchises', icon: Store },
           ].map((item) => (
             <button
               key={item.id}
@@ -702,12 +723,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
             {activeTab === 'dashboard' && <DashboardTab />}
             {activeTab === 'orders' && <OrdersTab />}
             {activeTab === 'menu' && <MenuTab />}
+            {activeTab === 'blog' && <BlogTab />}
             {activeTab === 'customers' && <CustomersTab />}
             {activeTab === 'team' && <TeamTab />}
             {activeTab === 'messages' && <MessagesTab />}
-            {activeTab === 'merch' && <PlaceholderTab title="Merchandise" icon={Shirt} />}
-            {activeTab === 'events' && <PlaceholderTab title="Events" icon={Calendar} />}
-            {activeTab === 'rewards' && <PlaceholderTab title="Rewards" icon={Gift} />}
+            {activeTab === 'merch' && <MerchTab />}
+            {activeTab === 'events' && <EventsTab />}
+            {activeTab === 'rewards' && <RewardsTab />}
+            {activeTab === 'franchise' && <FranchiseTab />}
           </>
         )}
       </main>
