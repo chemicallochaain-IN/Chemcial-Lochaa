@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard, ShoppingBag, Users, UtensilsCrossed,
   MessageSquare, BarChart3, Settings, Search, CheckCircle,
-  XCircle, Clock, ChefHat, Truck, Edit2, Plus, Trash2, Gift, Shirt, Calendar, UserPlus, Shield, FolderPlus, Send, FileText, Store
+  XCircle, Clock, ChefHat, Truck, Edit2, Plus, Trash2, Gift, Shirt, Calendar, UserPlus, Shield, FolderPlus, Send, FileText, Store, Mail, Loader2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { User, Order, ContactMessage, MenuCategory, MenuItem } from '../types';
@@ -544,7 +544,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
 
   const MessagesTab = () => {
     const [replySuccess, setReplySuccess] = useState<string | null>(null);
+    const [replySuccessType, setReplySuccessType] = useState<'whatsapp' | 'email'>('whatsapp');
     const [msgFilter, setMsgFilter] = useState('all');
+
+    // Email reply form state
+    const [emailReplyTo, setEmailReplyTo] = useState<ContactMessage | null>(null);
+    const [emailReplyText, setEmailReplyText] = useState('');
+    const [emailSending, setEmailSending] = useState(false);
+    const [emailError, setEmailError] = useState<string | null>(null);
 
     const MESSAGE_CATEGORIES = ['all', 'Book an Event / Party', 'Franchise Enquiry', 'Feedback', 'Other'];
     const filteredMessages = msgFilter === 'all' ? messages : messages.filter(m => m.subject === msgFilter);
@@ -570,8 +577,49 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
       }
       window.open(getWhatsAppLink(msg.phone, msg), '_blank');
       await updateMessageStatus(msg.id, 'replied');
+      setReplySuccessType('whatsapp');
       setReplySuccess(msg.id);
       setTimeout(() => setReplySuccess(null), 3000);
+    };
+
+    const handleEmailReply = async () => {
+      if (!emailReplyTo || !emailReplyText.trim()) return;
+      setEmailSending(true);
+      setEmailError(null);
+
+      try {
+        const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL || 'https://mrphakgvwefkknalkalj.supabase.co';
+        const supabaseAnonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ycGhha2d2d2Vma2tuYWxrYWxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNTU4NDgsImV4cCI6MjA4NjczMTg0OH0._AmkNzbZj8yHPYPj4HJaRD0pshyBEibsf3V1VPR_Ad4';
+
+        const res = await fetch(`${supabaseUrl}/functions/v1/send-reply`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+          },
+          body: JSON.stringify({
+            customerName: emailReplyTo.name,
+            customerEmail: emailReplyTo.email,
+            originalSubject: emailReplyTo.subject,
+            originalMessage: emailReplyTo.message,
+            replyMessage: emailReplyText.trim(),
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to send email');
+
+        await updateMessageStatus(emailReplyTo.id, 'replied');
+        setReplySuccessType('email');
+        setReplySuccess(emailReplyTo.id);
+        setEmailReplyTo(null);
+        setEmailReplyText('');
+        setTimeout(() => setReplySuccess(null), 3000);
+      } catch (err: any) {
+        setEmailError(err.message || 'Failed to send email reply');
+      } finally {
+        setEmailSending(false);
+      }
     };
 
     const getStatusBadge = (status: string) => {
@@ -627,12 +675,57 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
               {/* Reply Success Toast */}
               {replySuccess === msg.id && (
                 <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded text-green-700 text-sm flex items-center gap-2 animate-in fade-in">
-                  <CheckCircle size={16} /> WhatsApp opened for {msg.name}
+                  <CheckCircle size={16} />
+                  {replySuccessType === 'whatsapp' ? `WhatsApp opened for ${msg.name}` : `Email sent to ${msg.email}`}
+                </div>
+              )}
+
+              {/* Email Reply Form (inline, slides open below the message) */}
+              {emailReplyTo?.id === msg.id && (
+                <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-3 animate-in fade-in">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-bold text-sm text-brand-teal flex items-center gap-2">
+                      <Mail size={14} /> Reply via Email to {msg.name} &lt;{msg.email}&gt;
+                    </h4>
+                    <button
+                      onClick={() => { setEmailReplyTo(null); setEmailReplyText(''); setEmailError(null); }}
+                      className="text-xs text-gray-500 hover:text-red-500 font-bold"
+                    >
+                      ✕ Cancel
+                    </button>
+                  </div>
+                  <textarea
+                    value={emailReplyText}
+                    onChange={e => setEmailReplyText(e.target.value)}
+                    rows={4}
+                    placeholder={`Type your reply to ${msg.name}...`}
+                    className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal text-sm"
+                  />
+                  {emailError && (
+                    <div className="p-2 bg-red-50 border border-red-200 rounded text-red-600 text-xs flex items-center gap-1">
+                      <XCircle size={12} /> {emailError}
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleEmailReply}
+                      disabled={emailSending || !emailReplyText.trim()}
+                      className="text-xs bg-brand-teal text-white px-4 py-2 rounded hover:bg-brand-yellow hover:text-brand-teal transition-colors font-bold flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {emailSending ? <><Loader2 size={12} className="animate-spin" /> Sending...</> : <><Send size={12} /> Send Email</>}
+                    </button>
+                    <button
+                      onClick={() => { setEmailReplyTo(null); setEmailReplyText(''); setEmailError(null); }}
+                      className="text-xs border border-gray-300 px-3 py-2 rounded hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               )}
 
               {/* Action Buttons */}
-              <div className="mt-4 flex gap-2">
+              <div className="mt-4 flex gap-2 flex-wrap">
                 {msg.phone && (
                   <button
                     onClick={() => handleWhatsAppReply(msg)}
@@ -641,13 +734,21 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
                     <MessageSquare size={12} /> Reply via WhatsApp
                   </button>
                 )}
-                {!msg.phone && msg.email && (
-                  <a
-                    href={`mailto:${msg.email}?subject=Re: ${msg.subject} — Chemical Lochaa`}
-                    className="text-xs bg-brand-teal text-white px-3 py-1.5 rounded hover:bg-brand-yellow hover:text-brand-teal transition-colors font-bold flex items-center gap-1"
+                {msg.email && (
+                  <button
+                    onClick={() => {
+                      setEmailReplyTo(emailReplyTo?.id === msg.id ? null : msg);
+                      setEmailReplyText('');
+                      setEmailError(null);
+                    }}
+                    className={`text-xs px-3 py-1.5 rounded font-bold flex items-center gap-1 transition-colors ${
+                      emailReplyTo?.id === msg.id
+                        ? 'bg-blue-700 text-white'
+                        : 'bg-brand-teal text-white hover:bg-brand-yellow hover:text-brand-teal'
+                    }`}
                   >
-                    <MessageSquare size={12} /> Reply via Email
-                  </a>
+                    <Mail size={12} /> Reply via Email
+                  </button>
                 )}
                 {msg.status === 'new' && (
                   <button

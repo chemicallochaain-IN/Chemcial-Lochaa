@@ -1,13 +1,12 @@
 import React from 'react';
-import { Beaker, Instagram } from 'lucide-react';
+import { Beaker, Handshake } from 'lucide-react';
 import { Logo } from './Logo';
-import { CONTACT_INFO } from '../constants';
 
 const Hero: React.FC = () => {
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
       <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
-        
+
         {/* Established Badge */}
         <div className="mb-8 inline-block border-b-2 border-brand-teal pb-1">
           <span className="font-display text-xl tracking-widest text-brand-teal">EST. 2025</span>
@@ -15,41 +14,39 @@ const Hero: React.FC = () => {
 
         {/* Main Logo Composition */}
         <div className="relative mb-8 mx-auto w-fit">
-           <Logo variant="hero" />
+          <Logo variant="hero" />
         </div>
 
         {/* City Script */}
         <div className="relative mt-2 mb-10">
-            <span className="font-handwriting text-3xl md:text-5xl text-brand-teal" style={{ fontFamily: 'cursive' }}>
-              The Flavour Lab
-            </span>
-            <div className="h-[2px] w-24 bg-brand-teal mx-auto mt-2"></div>
+          <span className="font-handwriting text-3xl md:text-5xl text-brand-teal" style={{ fontFamily: 'cursive' }}>
+            The Flavour Lab
+          </span>
+          <div className="h-[2px] w-24 bg-brand-teal mx-auto mt-2"></div>
         </div>
 
         <h1 className="sr-only">Chemical Lochaa</h1>
-        
+
         <p className="font-display text-3xl md:text-5xl text-brand-teal uppercase font-bold leading-tight mb-6">
           Experiment with Flavour at Your Next Event
         </p>
 
         <p className="text-brand-teal font-sans text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-          From corporate gatherings to private parties, let the Scientists curate an experimental culinary experience for you. 
+          From corporate gatherings to private parties, let the Scientists curate an experimental culinary experience for you.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a 
+          <a
             href="#contact"
             className="px-8 py-4 bg-brand-teal text-brand-cream font-display text-xl uppercase tracking-wider rounded border-2 border-brand-teal hover:bg-transparent hover:text-brand-teal transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
           >
             <Beaker size={20} /> Host an Event
           </a>
-          <a 
-            href={CONTACT_INFO.socials.instagram}
-            target="_blank"
-            rel="noreferrer"
+          <a
+            href="#contact"
             className="px-8 py-4 bg-transparent text-brand-teal font-display text-xl uppercase tracking-wider rounded border-2 border-brand-teal hover:bg-brand-yellow hover:border-brand-yellow hover:text-brand-teal transition-all duration-300 flex items-center justify-center gap-2"
           >
-            <Instagram size={20} /> Instagram
+            <Handshake size={20} /> Get a Franchise
           </a>
         </div>
       </div>
