@@ -6,6 +6,7 @@ const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Chemical Lochaa <onboarding@re
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 serve(async (req: Request) => {
@@ -14,7 +15,23 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { customerName, customerEmail, originalSubject, originalMessage, replyMessage } = await req.json();
+    // Safely parse the request body
+    const bodyText = await req.text();
+    console.log("Received body length:", bodyText.length);
+
+    if (!bodyText || bodyText.trim().length === 0) {
+      throw new Error("Request body is empty");
+    }
+
+    let payload;
+    try {
+      payload = JSON.parse(bodyText);
+    } catch (parseErr) {
+      console.error("JSON parse error. Body was:", bodyText.substring(0, 200));
+      throw new Error("Invalid JSON in request body");
+    }
+
+    const { customerName, customerEmail, originalSubject, originalMessage, replyMessage } = payload;
 
     if (!RESEND_API_KEY) {
       throw new Error("RESEND_API_KEY is not configured");
