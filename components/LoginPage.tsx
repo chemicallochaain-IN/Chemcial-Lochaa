@@ -25,31 +25,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ isAdminLogin = false }) => {
 
     try {
       if (isSignUp && !isAdminLogin) {
-        // 1. Sign Up
-        const { data: authData, error: authError } = await supabase.auth.signUp({
+        // 1. Sign Up (including name metadata for the trigger to pick up)
+        const { error: authError } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,
+          options: {
+            data: {
+              name: formData.name
+            }
+          }
         });
 
         if (authError) throw authError;
 
-        if (authData.user) {
-          // 2. Create Profile
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .insert([
-              { 
-                id: authData.user.id,
-                name: formData.name,
-                email: formData.email,
-                loyalty_points: 0 // New users start at 0
-              }
-            ]);
-            
-          if (profileError) {
-             console.error("Profile creation failed, but account created.", profileError);
-          }
-        }
+        // Note: Profile is now created automatically by a SQL trigger
+        // This avoids the 42501 RLS error before the user is confirmed.
 
       } else {
         // Sign In
