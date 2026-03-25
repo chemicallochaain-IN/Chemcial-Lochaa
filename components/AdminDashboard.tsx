@@ -4,7 +4,7 @@ import {
   MessageSquare, BarChart3, Settings, Search, CheckCircle,
   XCircle, Clock, ChefHat, Truck, Edit2, Plus, Trash2, Gift, Shirt, Calendar, UserPlus, Shield, FolderPlus, Send, FileText, Store, Mail, Loader2
 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseAnonKey } from '../lib/supabase';
 import { User, Order, ContactMessage, MenuCategory, MenuItem } from '../types';
 import MenuItemForm from './MenuItemForm';
 import CategoryForm from './CategoryForm';
@@ -589,6 +589,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
 
       try {
         const { data, error: functionError } = await supabase.functions.invoke('send-reply', {
+          headers: {
+            Authorization: `Bearer ${supabaseAnonKey}`,
+          },
           body: {
             customerName: emailReplyTo.name,
             customerEmail: emailReplyTo.email,
