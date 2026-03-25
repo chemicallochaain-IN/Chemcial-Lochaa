@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Chemical Lochaa <onboarding@resend.dev>";
+const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Chemical Lochaa <info@chemicallochaa.in>";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -71,7 +71,7 @@ serve(async (req: Request) => {
               <div style="text-align: center; color: #999; font-size: 12px;">
                 <p style="margin: 0 0 4px;">Chemical Lochaa</p>
                 <p style="margin: 0 0 4px;">Shop no-28, Sector-1, Main Market, Ambala City - 134003</p>
-                <p style="margin: 0;">📞 +91 72068 79847 | 📧 chemicallochaa.in@gmail.com</p>
+                <p style="margin: 0;">📞 +91 72068 79847 | 📧 info@chemicallochaa.in</p>
               </div>
             </div>
           </div>
