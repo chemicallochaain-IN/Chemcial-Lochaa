@@ -588,26 +588,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
       setEmailError(null);
 
       try {
-        const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL || 'https://mrphakgvwefkknalkalj.supabase.co';
-        const supabaseAnonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ycGhha2d2d2Vma2tuYWxrYWxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNTU4NDgsImV4cCI6MjA4NjczMTg0OH0._AmkNzbZj8yHPYPj4HJaRD0pshyBEibsf3V1VPR_Ad4';
-
-        const res = await fetch(`${supabaseUrl}/functions/v1/send-reply`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${supabaseAnonKey}`,
-          },
-          body: JSON.stringify({
+        const { data, error: functionError } = await supabase.functions.invoke('send-reply', {
+          body: {
             customerName: emailReplyTo.name,
             customerEmail: emailReplyTo.email,
             originalSubject: emailReplyTo.subject,
             originalMessage: emailReplyTo.message,
             replyMessage: emailReplyText.trim(),
-          }),
+          },
         });
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to send email');
+        if (functionError) throw functionError;
 
         await updateMessageStatus(emailReplyTo.id, 'replied');
         setReplySuccessType('email');
