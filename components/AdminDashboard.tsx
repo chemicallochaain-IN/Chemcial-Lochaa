@@ -5,7 +5,7 @@ import {
   XCircle, Clock, ChefHat, Truck, Edit2, Plus, Trash2, Gift, Shirt, Calendar, UserPlus, Shield, FolderPlus, Send, FileText, Store, Mail, Loader2
 } from 'lucide-react';
 import { supabase, supabaseUrl, supabaseAnonKey } from '../lib/supabase';
-import { User, Order, ContactMessage, MenuCategory, MenuItem } from '../types';
+import { User, Order, ContactMessage, MessageReply, MenuCategory, MenuItem } from '../types';
 import MenuItemForm from './MenuItemForm';
 import CategoryForm from './CategoryForm';
 import BlogTab from './admin/BlogTab';
@@ -29,6 +29,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
   const [employees, setEmployees] = useState<User[]>([]);
   const [menuData, setMenuData] = useState<MenuCategory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Communications History State
+  const [replies, setReplies] = useState<MessageReply[]>([]);
+  const [isFetchingReplies, setIsFetchingReplies] = useState(false);
+  const [expandedMessageId, setExpandedMessageId] = useState<string | null>(null);
 
   // Menu form state
   const [showItemForm, setShowItemForm] = useState(false);
@@ -103,6 +108,48 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
       })));
     }
     setIsLoading(false);
+  };
+
+  const fetchReplies = (messageId: string) => {
+    setIsFetchingReplies(true);
+    setReplies([]); // Clear previous replies
+    
+    // Initial fetch
+    supabase
+      .from('message_replies')
+      .select('*')
+      .eq('message_id', messageId)
+      .order('created_at', { ascending: true })
+      .then(({ data, error }: { data: MessageReply[] | null, error: any }) => {
+        if (!error && data) setReplies(data);
+        setIsFetchingReplies(false);
+      });
+
+    // Subscribe to real-time updates for this message's replies
+    const channel = supabase
+      .channel(`message_replies:${messageId}`)
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'message_replies',
+        filter: `message_id=eq.${messageId}`
+      }, (payload: any) => {
+        setReplies((prev: MessageReply[]) => [...prev, payload.new as MessageReply]);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
+
+  const logReply = async (messageId: string, type: 'email' | 'whatsapp', content: string) => {
+    await supabase.from('message_replies').insert({
+      message_id: messageId,
+      sender_type: 'admin',
+      message_type: type,
+      content: content
+    });
   };
 
   const fetchMessages = async () => {
@@ -577,6 +624,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
       }
       window.open(getWhatsAppLink(msg.phone, msg), '_blank');
       await updateMessageStatus(msg.id, 'replied');
+      await logReply(msg.id, 'whatsapp', `Sent WhatsApp message to ${msg.phone}`);
       setReplySuccessType('whatsapp');
       setReplySuccess(msg.id);
       setTimeout(() => setReplySuccess(null), 3000);
@@ -610,6 +658,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
         }
 
         await updateMessageStatus(emailReplyTo.id, 'replied');
+        await logReply(emailReplyTo.id, 'email', emailReplyText.trim());
         setReplySuccessType('email');
         setReplySuccess(emailReplyTo.id);
         setEmailReplyTo(null);
@@ -672,6 +721,54 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
               </div>
               <p className="text-gray-700 bg-gray-50 p-4 rounded border border-gray-100 whitespace-pre-wrap">{msg.message}</p>
 
+              {/* Conversation History */}
+              <div className="mt-4">
+                <button 
+                  onClick={() => {
+                    if (expandedMessageId === msg.id) {
+                      setExpandedMessageId(null);
+                    } else {
+                      setExpandedMessageId(msg.id);
+                      fetchReplies(msg.id);
+                    }
+                  }}
+                  className="text-xs font-bold text-brand-teal flex items-center gap-1 hover:underline"
+                >
+                  <MessageSquare size={14} /> 
+                  {expandedMessageId === msg.id ? 'Hide Conversation' : `View Conversation (${replies.filter((r: MessageReply) => r.message_id === msg.id).length > 0 ? 'History available' : 'Show history'})`}
+                </button>
+
+                  {expandedMessageId === msg.id && (
+                  <div className="mt-3 pl-4 border-l-2 border-brand-teal/20 space-y-4 animate-in slide-in-from-top-2">
+                    {isFetchingReplies ? (
+                      <div className="flex items-center gap-2 text-xs text-gray-400 italic">
+                        <Loader2 size={12} className="animate-spin" /> Loading history...
+                      </div>
+                    ) : replies.filter((r: MessageReply) => r.message_id === msg.id).length === 0 ? (
+                      <div className="text-xs text-gray-400 italic">No previous history found.</div>
+                    ) : (
+                      replies.filter((r: MessageReply) => r.message_id === msg.id).map((reply: MessageReply) => (
+                        <div key={reply.id} className={`p-3 rounded-lg text-sm ${
+                          reply.sender_type === 'admin' ? 'bg-blue-50 ml-4' : 'bg-green-50 mr-4'
+                        }`}>
+                          <div className="flex justify-between items-center mb-1">
+                            <span className={`text-[10px] font-bold uppercase ${
+                              reply.sender_type === 'admin' ? 'text-blue-600' : 'text-green-600'
+                            }`}>
+                              {reply.sender_type === 'admin' ? 'You' : msg.name} • {reply.message_type}
+                            </span>
+                            <span className="text-[10px] text-gray-400">
+                              {new Date(reply.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                          <div className="whitespace-pre-wrap">{reply.content}</div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+
               {/* Reply Success Toast */}
               {replySuccess === msg.id && (
                 <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded text-green-700 text-sm flex items-center gap-2 animate-in fade-in">
@@ -696,7 +793,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
                   </div>
                   <textarea
                     value={emailReplyText}
-                    onChange={e => setEmailReplyText(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEmailReplyText(e.target.value)}
                     rows={4}
                     placeholder={`Type your reply to ${msg.name}...`}
                     className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal text-sm"

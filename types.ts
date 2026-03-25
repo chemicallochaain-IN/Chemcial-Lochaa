@@ -64,6 +64,16 @@ export interface ContactMessage {
   phone?: string;
 }
 
+export interface MessageReply {
+  id: string;
+  created_at: string;
+  message_id: string;
+  sender_type: 'admin' | 'customer';
+  message_type: 'email' | 'whatsapp';
+  content: string;
+  metadata?: any;
+}
+
 export interface BlogPost {
   id: string;
   created_at: string;
