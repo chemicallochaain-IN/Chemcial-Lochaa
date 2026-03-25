@@ -4,7 +4,7 @@ import {
   MessageSquare, BarChart3, Settings, Search, CheckCircle,
   XCircle, Clock, ChefHat, Truck, Edit2, Plus, Trash2, Gift, Shirt, Calendar, UserPlus, Shield, FolderPlus, Send, FileText, Store, Mail, Loader2
 } from 'lucide-react';
-import { supabase, supabaseAnonKey } from '../lib/supabase';
+import { supabase, supabaseUrl, supabaseAnonKey } from '../lib/supabase';
 import { User, Order, ContactMessage, MenuCategory, MenuItem } from '../types';
 import MenuItemForm from './MenuItemForm';
 import CategoryForm from './CategoryForm';
@@ -588,20 +588,26 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
       setEmailError(null);
 
       try {
-        const { data, error: functionError } = await supabase.functions.invoke('send-reply', {
+        const res = await fetch(`${supabaseUrl}/functions/v1/send-reply`, {
+          method: 'POST',
           headers: {
-            Authorization: `Bearer ${supabaseAnonKey}`,
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+            'apikey': supabaseAnonKey
           },
-          body: {
+          body: JSON.stringify({
             customerName: emailReplyTo.name,
             customerEmail: emailReplyTo.email,
             originalSubject: emailReplyTo.subject,
             originalMessage: emailReplyTo.message,
             replyMessage: emailReplyText.trim(),
-          },
+          }),
         });
 
-        if (functionError) throw functionError;
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || 'Failed to send email');
+        }
 
         await updateMessageStatus(emailReplyTo.id, 'replied');
         setReplySuccessType('email');
