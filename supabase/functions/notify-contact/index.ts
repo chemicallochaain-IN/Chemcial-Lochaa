@@ -32,6 +32,7 @@ serve(async (req: Request) => {
       body: JSON.stringify({
         from: FROM_EMAIL,
         to: [ADMIN_EMAIL],
+        reply_to: "chemicallochaa.in@gmail.com",
         subject: `🧪 New Contact: ${subject} — from ${name}`,
         html: `
           <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9f7f2; border-radius: 12px; overflow: hidden;">
