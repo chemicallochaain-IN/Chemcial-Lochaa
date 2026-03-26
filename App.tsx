@@ -13,6 +13,7 @@ import Footer from './components/Footer';
 import BackgroundDoodles from './components/BackgroundDoodles';
 import LoginPage from './components/LoginPage';
 import MyLab from './components/MyLab';
+import RegisterPage from './components/RegisterPage';
 import AdminDashboard from './components/AdminDashboard';
 import FeedbackSection from './components/FeedbackSection';
 import { User } from './types';
@@ -20,13 +21,13 @@ import { supabase } from './lib/supabase';
 
 function App() {
   const [isOrderOpen, setIsOrderOpen] = useState(false);
-  const [currentView, setCurrentView] = useState<'home' | 'login' | 'mylab' | 'admin' | 'adminLogin'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'login' | 'register' | 'mylab' | 'admin' | 'adminLogin'>('home');
   const [user, setUser] = useState<User | null>(null);
 
   // Initialize Auth Listener
   useEffect(() => {
     // Check active session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
       if (session) {
         fetchProfile(session.user.id, session.user.email!);
       }
@@ -35,7 +36,7 @@ function App() {
     // Listen for changes (Login/Logout)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       if (session) {
         fetchProfile(session.user.id, session.user.email!);
       } else {
@@ -131,11 +132,18 @@ function App() {
         )}
 
         {currentView === 'login' && (
-          <LoginPage onLogin={() => {}} />
+          <LoginPage onLogin={() => {}} onNavigate={setCurrentView} />
+        )}
+
+        {currentView === 'register' && (
+          <RegisterPage 
+            onSuccess={() => setCurrentView('login')} 
+            onBackToLogin={() => setCurrentView('login')} 
+          />
         )}
 
         {currentView === 'adminLogin' && (
-          <LoginPage onLogin={() => {}} isAdminLogin={true} />
+          <LoginPage onLogin={() => {}} isAdminLogin={true} onNavigate={setCurrentView} />
         )}
 
         {currentView === 'mylab' && user && (

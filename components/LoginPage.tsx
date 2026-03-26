@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { Beaker, UserPlus, LogIn, AlertCircle, Loader2, ShieldCheck } from 'lucide-react';
+import { Beaker, LogIn, AlertCircle, Loader2, ShieldCheck } from 'lucide-react';
 import { User } from '../types';
 import { supabase } from '../lib/supabase';
 
 interface LoginPageProps {
   onLogin: (user: User) => void;
   isAdminLogin?: boolean;
+  onNavigate?: (view: 'home' | 'login' | 'register' | 'mylab' | 'admin' | 'adminLogin') => void;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ isAdminLogin = false }) => {
-  const [isSignUp, setIsSignUp] = useState(false);
+const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isAdminLogin = false, onNavigate }) => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -24,34 +24,42 @@ const LoginPage: React.FC<LoginPageProps> = ({ isAdminLogin = false }) => {
     setErrorMsg(null);
 
     try {
-      if (isSignUp && !isAdminLogin) {
-        // 1. Sign Up (including name metadata for the trigger to pick up)
-        const { error: authError } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password,
-          options: {
-            data: {
-              name: formData.name
-            }
+      // Sign In
+      const { error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) throw error;
+
+      const { data: authData } = await supabase.auth.getUser();
+
+      if (authData.user) {
+        // Check if the user is an admin if isAdminLogin is true
+        if (isAdminLogin) {
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', authData.user.id)
+            .single();
+
+          if (profileError) throw profileError;
+
+          if (profileData?.is_admin) {
+            onLogin(authData.user as User);
+          } else {
+            // Not an admin, log them out and show error
+            await supabase.auth.signOut();
+            setErrorMsg('Access Denied: You are not an administrator.');
           }
-        });
-
-        if (authError) throw authError;
-
-        // Note: Profile is now created automatically by a SQL trigger
-        // This avoids the 42501 RLS error before the user is confirmed.
-
-      } else {
-        // Sign In
-        const { error } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password,
-        });
-
-        if (error) throw error;
+        } else {
+          // Regular user login
+          onLogin(authData.user as User);
+        }
       }
     } catch (error: any) {
       setErrorMsg(error.message || 'Authentication failed');
+    } finally {
       setLoading(false);
     }
   };
@@ -73,12 +81,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ isAdminLogin = false }) => {
             )}
           </div>
           <h2 className="font-display text-3xl text-brand-teal uppercase font-bold">
-            {isAdminLogin ? 'Restricted Access' : (isSignUp ? 'Join the Lab' : 'Access My Lab')}
+            {isAdminLogin ? 'Restricted Access' : 'Access My Lab'}
           </h2>
           <p className="text-gray-500 font-sans mt-2 text-sm">
             {isAdminLogin 
               ? 'Authorized personnel only. Please verify identity.' 
-              : (isSignUp ? 'Create your account to start earning rewards.' : 'Welcome back, scientist. Enter your credentials.')}
+              : 'Welcome back, scientist. Enter your credentials.'}
           </p>
         </div>
 
@@ -89,20 +97,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ isAdminLogin = false }) => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {isSignUp && !isAdminLogin && (
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-brand-teal uppercase tracking-wider">Full Name</label>
-              <input 
-                type="text" 
-                required 
-                className="w-full p-3 bg-brand-cream border border-brand-teal/20 rounded focus:outline-none focus:border-brand-teal transition-colors"
-                placeholder="Albert Einstein"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-              />
-            </div>
-          )}
-          
           <div className="space-y-1">
             <label className="text-xs font-bold text-brand-teal uppercase tracking-wider">Email Address</label>
             <input 
@@ -135,8 +129,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ isAdminLogin = false }) => {
           >
             {loading ? (
                <Loader2 className="animate-spin" size={20} />
-            ) : (isSignUp && !isAdminLogin) ? (
-                <>Create Account <UserPlus size={18} /></>
             ) : (
                 <>{isAdminLogin ? 'Authenticate' : 'Enter Lab'} <LogIn size={18} /></>
             )}
@@ -146,15 +138,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ isAdminLogin = false }) => {
         {!isAdminLogin && (
           <div className="mt-8 text-center border-t border-brand-teal/10 pt-6">
             <p className="text-sm text-gray-600 font-sans">
-              {isSignUp ? 'Already have an account?' : "Don't have an account yet?"}
+              Don't have an account yet?
               <button 
-                onClick={() => {
-                  setIsSignUp(!isSignUp);
-                  setErrorMsg(null);
-                }}
+                onClick={() => onNavigate && onNavigate('register')}
                 className="ml-2 text-brand-teal font-bold hover:text-brand-yellow transition-colors underline"
               >
-                {isSignUp ? 'Login Here' : 'Join Now'}
+                Join Now
               </button>
             </p>
           </div>
