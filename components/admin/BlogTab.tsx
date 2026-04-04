@@ -251,7 +251,7 @@ const BlogTab: React.FC = () => {
             <div
                 ref={editorRef}
                 contentEditable
-                className="min-h-[400px] bg-white border border-t-0 border-gray-200 rounded-b p-6 focus:outline-none prose prose-lg max-w-none [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-brand-teal [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-brand-teal [&_blockquote]:border-l-4 [&_blockquote]:border-brand-yellow [&_blockquote]:pl-4 [&_blockquote]:italic [&_pre]:bg-gray-100 [&_pre]:p-4 [&_pre]:rounded [&_a]:text-brand-teal [&_a]:underline [&_table]:w-full [&_td]:border [&_td]:border-gray-300 [&_td]:p-2 [&_img]:max-w-full [&_img]:rounded [&_img]:my-4"
+                className="min-h-[400px] bg-white border border-t-0 border-gray-200 rounded-b p-6 focus:outline-none prose prose-lg max-w-none [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-brand-teal [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-brand-teal [&_blockquote]:border-l-4 [&_blockquote]:border-brand-yellow [&_blockquote]:pl-4 [&_blockquote]:italic [&_pre]:bg-gray-100 [&_pre]:p-4 [&_pre]:rounded [&_a]:text-brand-teal [&_a]:underline [&_table]:w-full [&_td]:border [&_td]:border-gray-300 [&_td]:p-2 [&_img]:max-w-full [&_img]:rounded [&_img]:my-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-4 [&_li]:mb-2"
                 suppressContentEditableWarning
             />
         </div>
