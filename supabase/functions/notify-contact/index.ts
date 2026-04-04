@@ -2,7 +2,11 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const ADMIN_EMAIL = "info@chemicallochaa.in";
-const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Chemical Lochaa <info@chemicallochaa.in>";
+const FROM_EMAIL = "Chemical Lochaa <info@chemicallochaa.in>";
+
+// WhatsApp Cloud API Tokens
+const WHATSAPP_TOKEN = Deno.env.get("WHATSAPP_TOKEN") || "EAAXj8WgJV74BQ4754t4y00UNLuWdWlaKuabFkrVrluZA7l68G7h40CnqStblKn154WyFrjh54GKREMKkS46JyUTcmrt19lrcGSnuX2AWDA7Mczgtfe8zlx08f8OQxPfZCRvwadSKbIX7m2ZCDvimoT7fnHw4IQOXl9reUhHqDQvGr5PlvAvcEcNcoH0PDkED5XV8LREifP62UOqQvypWlUgYf0BXcZAGiDCyyKnl";
+const WHATSAPP_PHONE_ID = Deno.env.get("WHATSAPP_PHONE_ID") || "681705745027502";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -78,10 +82,9 @@ serve(async (req: Request) => {
     }
 
     // ---------------------------------------------------------------
-    // 2. Customer Email Acknowledgement — COMMENTED OUT
-    //    Replaced by WhatsApp acknowledgement (see send-whatsapp function)
+    // 2. Customer Email Acknowledgement
     // ---------------------------------------------------------------
-    /*
+    console.log("Sending customer email acknowledgement...");
     const customerEmailRes = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -132,7 +135,37 @@ serve(async (req: Request) => {
         const errData = await customerEmailRes.json();
         console.error("Customer email failed:", errData);
     }
-    */
+
+    // ---------------------------------------------------------------
+    // 3. Customer WhatsApp Acknowledgement
+    // ---------------------------------------------------------------
+    if (phone) {
+      console.log("Sending customer WhatsApp acknowledgement...");
+      // Clean phone number (remove + and spaces)
+      const cleanPhone = phone.replace(/[+\s-]/g, "");
+      
+      const whatsappRes = await fetch(`https://graph.facebook.com/v18.0/${WHATSAPP_PHONE_ID}/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          to: cleanPhone,
+          type: "template",
+          template: {
+            name: "contact_ack", // Must be an approved template in Meta Business Manager
+            language: { code: "en" }
+          }
+        }),
+      });
+
+      if (!whatsappRes.ok) {
+        const waData = await whatsappRes.json();
+        console.error("WhatsApp API error:", waData);
+      }
+    }
 
     return new Response(
       JSON.stringify({ success: true, message: "Notifications sent" }),
