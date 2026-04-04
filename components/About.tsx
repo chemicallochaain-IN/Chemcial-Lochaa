@@ -1,7 +1,9 @@
 import React from 'react';
 import { Microscope, Telescope } from 'lucide-react';
+import { useSiteImage } from '../hooks/useSiteImage';
 
 const About: React.FC = () => {
+  const { imageUrl } = useSiteImage('about_photo');
   return (
     <section id="story" className="py-20 relative border-t-2 border-dashed border-brand-teal/30">
       <div className="max-w-6xl mx-auto px-6">
@@ -30,7 +32,7 @@ const About: React.FC = () => {
             <div className="relative h-full flex flex-col items-center justify-center border-4 border-brand-teal bg-brand-cream p-3 rotate-1 shadow-lg hover:rotate-0 transition-transform duration-500">
                 <div className="w-full aspect-[4/3] overflow-hidden bg-gray-200 border-b-4 border-brand-teal relative">                  
                    <img 
-                    src="public/assets/Scientists.svg" 
+                    src={imageUrl || "public/assets/Scientists.svg"} 
                     alt="The Scientist Brothers" 
                     className="w-full h-full object-cover"
                    />

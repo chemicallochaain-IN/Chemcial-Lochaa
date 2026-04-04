@@ -26,7 +26,10 @@ const ImageManagerTab: React.FC = () => {
         .from('site_images')
         .select('*')
         .order('sort_order');
-      if (!error && data) setSiteImages(data);
+      if (!error && data) {
+         setSiteImages(data);
+         window.dispatchEvent(new Event('siteImageUpdated'));
+      }
     } catch (err) {
       console.error('Error fetching images:', err);
     } finally {

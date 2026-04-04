@@ -19,11 +19,27 @@ import AdminDashboard from './components/AdminDashboard';
 import FeedbackSection from './components/FeedbackSection';
 import { User } from './types';
 import { supabase } from './lib/supabase';
+import { useSiteImage } from './hooks/useSiteImage';
 
 function App() {
   // const [isOrderOpen, setIsOrderOpen] = useState(false); // [DISABLED] Online ordering turned off
   const [currentView, setCurrentView] = useState<'home' | 'login' | 'mylab' | 'admin' | 'adminLogin'>('home');
   const [user, setUser] = useState<User | null>(null);
+
+  // Dynamic Favicon Injection
+  const { imageUrl: faviconUrl } = useSiteImage('favicon');
+
+  useEffect(() => {
+    if (faviconUrl) {
+      let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+      }
+      link.href = faviconUrl;
+    }
+  }, [faviconUrl]);
 
   // Initialize Auth Listener
   useEffect(() => {

@@ -39,6 +39,10 @@ const Gallery: React.FC = () => {
     };
 
     fetchGalleryImages();
+
+    const handleUpdate = () => fetchGalleryImages();
+    window.addEventListener('siteImageUpdated', handleUpdate);
+    return () => window.removeEventListener('siteImageUpdated', handleUpdate);
   }, []);
 
   return (

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSiteImage } from '../hooks/useSiteImage';
 
 interface LogoProps {
   className?: string;
@@ -6,6 +7,7 @@ interface LogoProps {
 }
 
 export const Logo: React.FC<LogoProps> = ({ className = "", variant = 'default' }) => {
+  const { imageUrl } = useSiteImage('logo');
   
   // Inline SVG Component
   const LogoSVG = ({ className }: { className?: string }) => (
@@ -37,7 +39,11 @@ export const Logo: React.FC<LogoProps> = ({ className = "", variant = 'default' 
       <div 
         className={`flex flex-col items-center justify-center select-none shadow-[8px_8px_0px_0px_rgba(1,68,91,1)] p-[3px] border-2 border-brand-teal bg-brand-cream ${className}`}
       >
-        <LogoSVG className="w-auto h-56 md:h-80 object-contain drop-shadow-xl hover:scale-105 transition-transform duration-500" />
+        {imageUrl ? (
+          <img src={imageUrl} alt="Logo" className="w-auto h-56 md:h-80 object-contain drop-shadow-xl hover:scale-105 transition-transform duration-500" />
+        ) : (
+          <LogoSVG className="w-auto h-56 md:h-80 object-contain drop-shadow-xl hover:scale-105 transition-transform duration-500" />
+        )}
       </div>
     );
   }
@@ -45,7 +51,11 @@ export const Logo: React.FC<LogoProps> = ({ className = "", variant = 'default' 
   // Default / Navbar version
   return (
     <div className={`flex items-center gap-3 select-none p-[3px] border-2 border-brand-teal bg-brand-cream ${className}`}>
-      <LogoSVG className="w-auto h-14 md:h-16 object-contain" />
+      {imageUrl ? (
+        <img src={imageUrl} alt="Logo" className="w-auto h-14 md:h-16 object-contain" />
+      ) : (
+        <LogoSVG className="w-auto h-14 md:h-16 object-contain" />
+      )}
     </div>
   );
 };

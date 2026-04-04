@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase';
 interface LoginPageProps {
   onLogin: (user: User) => void;
   isAdminLogin?: boolean;
-  onNavigate?: (view: 'home' | 'login' | 'register' | 'mylab' | 'admin' | 'adminLogin') => void;
+  onNavigate?: (view: 'home' | 'login' | 'mylab' | 'admin' | 'adminLogin') => void;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isAdminLogin = false, onNavigate }) => {
