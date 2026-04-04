@@ -483,6 +483,19 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
       }
     };
 
+    const handleRemoveEmployee = async (id: string) => {
+      if (!window.confirm('Are you sure you want to remove this team member? This will delete their profile, effectively revoking their admin privileges.')) return;
+      
+      try {
+        const { error } = await supabase.from('profiles').delete().eq('id', id);
+        if (error) throw error;
+        alert('Employee profile removed successfully.');
+        fetchEmployees();
+      } catch (err: any) {
+        alert(err.message);
+      }
+    };
+
     return (
       <div className="space-y-6 animate-in fade-in">
         <div className="flex justify-between items-center">
@@ -558,7 +571,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
                     </span>
                   </td>
                   <td className="p-4">
-                    <button className="text-red-500 hover:underline text-xs" title="Requires Super Admin (Manual DB deletion for safety)">Remove</button>
+                    <button 
+                      onClick={() => handleRemoveEmployee(emp.id)}
+                      className="text-red-500 hover:text-red-700 hover:underline text-xs flex items-center gap-1 font-bold"
+                    >
+                      <Trash2 size={12} /> Remove
+                    </button>
                   </td>
                 </tr>
               ))}
