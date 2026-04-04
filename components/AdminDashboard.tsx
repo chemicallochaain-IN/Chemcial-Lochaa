@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import {
   LayoutDashboard, ShoppingBag, Users, UtensilsCrossed,
-  MessageSquare, BarChart3, Settings, Search, CheckCircle,
-  XCircle, Clock, ChefHat, Truck, Edit2, Plus, Trash2, Gift, Shirt, Calendar, UserPlus, Shield, FolderPlus, Send, FileText, Store, Mail, Loader2, Image, Sparkles
+  MessageSquare, BarChart3, CheckCircle,
+  XCircle, ChefHat, Truck, Edit2, Plus, Trash2, Gift, Shirt, Calendar, UserPlus, Shield, FolderPlus, Send, FileText, Store, Mail, Loader2, Image, Sparkles
 } from 'lucide-react';
 import { supabase, supabaseUrl, supabaseAnonKey } from '../lib/supabase';
 import { User, Order, ContactMessage, MessageReply, MenuCategory, MenuItem } from '../types';
@@ -449,30 +448,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
     const handleCreateEmployee = async (e: React.FormEvent) => {
       e.preventDefault();
       try {
-        // Use a secondary client to sign up the user so the current admin doesn't get logged out
-        const adminAuthClient = createClient(supabaseUrl, supabaseAnonKey, {
-          auth: { autoRefreshToken: false, persistSession: false }
-        });
-
-        const { data: authData, error: authError } = await adminAuthClient.auth.signUp({
+        const { error: rpcError } = await supabase.rpc('create_employee', {
           email: newEmployee.email,
           password: newEmployee.password,
+          full_name: newEmployee.name,
+          is_admin_role: newEmployee.isAdmin
         });
 
-        if (authError) throw authError;
-
-        if (authData.user) {
-          // Insert the profile manually since the user was just created
-          const { error: profileError } = await supabase.from('profiles').insert({
-             id: authData.user.id,
-             name: newEmployee.name,
-             email: newEmployee.email,
-             is_admin: newEmployee.isAdmin,
-             loyalty_points: 0
-          });
-
-          if (profileError) throw profileError;
-        }
+        if (rpcError) throw rpcError;
 
         alert('User created successfully');
         setIsAdding(false);
@@ -900,15 +883,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
       </div>
     );
   };
-
-  // Placeholder for extra tabs
-  const PlaceholderTab = ({ title, icon: Icon }: any) => (
-    <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-gray-300 rounded-lg text-gray-400">
-      <Icon size={48} className="mb-4 opacity-50" />
-      <h3 className="font-bold text-xl">{title} Module</h3>
-      <p>Coming to the lab soon.</p>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20 flex">

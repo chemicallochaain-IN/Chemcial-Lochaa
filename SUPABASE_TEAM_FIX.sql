@@ -1,9 +1,13 @@
 -- ==============================================================================
--- TEAM MEMBER RLS FIX
--- Run this in your Supabase SQL Editor to allow admins to manage profiles.
+-- TEAM MEMBER MGMT FIX
+-- Run this in your Supabase SQL Editor.
 -- ==============================================================================
 
--- Allow admins to insert new profiles
+-- 1. Ensure pgcrypto is enabled for the create_employee function
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- 2. RLS POLICIES FOR PROFILES
+-- Allow admins to insert new profiles (if not using RPC)
 CREATE POLICY "Admins can insert any profile" 
 ON public.profiles FOR INSERT 
 WITH CHECK (
