@@ -8,6 +8,7 @@ const PartyOffers: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const [enquireOffer, setEnquireOffer] = useState<string | null>(null);
+  const [selectedOffer, setSelectedOffer] = useState<PartyOffer | null>(null);
 
   useEffect(() => {
     const fetchOffers = async () => {
@@ -81,15 +82,16 @@ const PartyOffers: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 pb-8 no-scrollbar">
           {offers.map(offer => (
             <div 
               key={offer.id} 
-              className="bg-brand-cream rounded-2xl overflow-hidden shadow-2xl border-4 border-brand-teal flex flex-col transform hover:-translate-y-2 transition-all duration-300 hover:shadow-[0_20px_50px_rgba(1,68,91,0.3)] group"
+              onClick={() => setSelectedOffer(offer)}
+              className="bg-brand-cream rounded-2xl overflow-hidden shadow-xl border-4 border-brand-teal flex flex-col transform hover:-translate-y-2 transition-all duration-300 hover:shadow-[0_20px_50px_rgba(1,68,91,0.3)] group cursor-pointer relative min-w-[85vw] sm:min-w-[60vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink"
             >
               {offer.image_url ? (
-                <div className="relative h-56 overflow-hidden">
-                  <div className="absolute inset-0 bg-brand-teal/20 mix-blend-overlay z-10 group-hover:bg-transparent transition-colors duration-500"></div>
+                <div className="relative h-48 md:h-56 overflow-hidden bg-brand-teal/5">
+                  <div className="absolute inset-0 bg-gradient-to-t from-brand-teal/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
                   <img 
                     src={offer.image_url} 
                     alt={offer.title} 
@@ -107,20 +109,35 @@ const PartyOffers: React.FC = () => {
                 </div>
               )}
 
-              <div className="p-6 md:p-8 flex-1 flex flex-col bg-graph-paper">
+              <div className="p-6 md:p-8 flex-1 flex flex-col bg-graph-paper relative">
                 {offer.image_url && (
-                  <h3 className="font-display text-2xl text-brand-teal uppercase mb-3 leading-tight">
+                  <h3 className="font-display text-2xl text-brand-teal uppercase mb-3 leading-tight group-hover:text-brand-yellow transition-colors duration-300">
                     {offer.title}
                   </h3>
                 )}
                 
-                <p className="text-gray-700 whitespace-pre-wrap flex-1 text-sm md:text-base leading-relaxed mb-6">
+                <p className="text-gray-600 whitespace-pre-wrap flex-1 text-sm leading-relaxed mb-6 line-clamp-3">
                   {offer.description}
                 </p>
 
+                <div className="mt-2 text-right">
+                  <span className="text-xs font-bold text-brand-teal uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    + Read More
+                  </span>
+                </div>
+
+                <div className="mt-4 flex items-center gap-2">
+                  <div className="h-[2px] flex-1 bg-gradient-to-r from-brand-teal/20 to-transparent"></div>
+                  <Gift className="w-4 h-4 text-brand-yellow/50 group-hover:text-brand-yellow transition-colors" />
+                  <div className="h-[2px] flex-1 bg-gradient-to-l from-brand-teal/20 to-transparent"></div>
+                </div>
+              </div>
+
+              {/* Hover Enquire Button Overlay */}
+              <div className="absolute inset-x-0 bottom-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out z-30">
                 <button 
-                  onClick={() => setEnquireOffer(offer.title)}
-                  className="w-full bg-brand-teal text-brand-yellow font-bold py-4 rounded-xl shadow-[0_8px_0_0_rgba(1,68,91,0.8)] hover:translate-y-2 hover:shadow-[0_0px_0_0_rgba(1,68,91,0.8)] transition-all flex items-center justify-center gap-2 uppercase tracking-wide group-hover:bg-brand-yellow group-hover:text-brand-teal group-hover:shadow-[0_8px_0_0_rgba(202,138,4,0.8)]"
+                  onClick={(e) => { e.stopPropagation(); setEnquireOffer(offer.title); }}
+                  className="w-full bg-brand-yellow text-brand-teal font-bold py-4 rounded-xl shadow-2xl hover:translate-y-1 hover:shadow-xl transition-all flex items-center justify-center gap-2 uppercase tracking-wide border-2 border-brand-teal"
                 >
                   <Mail size={18} /> Enquire Now
                 </button>
@@ -157,6 +174,65 @@ const PartyOffers: React.FC = () => {
               >
                 <Mail size={22} /> Use Contact Form
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Selected Offer Modal */}
+      {selectedOffer && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-black/60 backdrop-blur-sm animate-in fade-in"
+          onClick={() => setSelectedOffer(null)}
+        >
+          <div 
+            className="bg-brand-cream w-full max-w-2xl max-h-[90vh] rounded-3xl shadow-2xl relative animate-in zoom-in-95 duration-300 border-4 border-brand-teal overflow-hidden flex flex-col"
+            onClick={e => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setSelectedOffer(null)}
+              className="absolute top-4 right-4 z-20 p-2 bg-brand-teal text-brand-yellow rounded-full hover:bg-brand-yellow hover:text-brand-teal transition-colors shadow-lg"
+            >
+              <X size={20} />
+            </button>
+            
+            <div className="w-full bg-brand-teal/5 relative h-64 md:h-80 flex-shrink-0 flex items-center justify-center p-0">
+              {selectedOffer.image_url ? (
+                <img
+                  src={selectedOffer.image_url}
+                  alt={selectedOffer.title}
+                  className="w-full h-full object-cover object-center"
+                />
+              ) : (
+                <Gift className="w-20 h-20 text-brand-yellow/30" />
+              )}
+            </div>
+
+            <div className="p-8 md:p-10 w-full bg-graph-paper overflow-y-auto no-scrollbar flex-1 relative pb-24">
+              <div className="inline-block px-3 py-1 bg-brand-yellow text-brand-teal text-xs font-bold uppercase tracking-widest rounded-full mb-4">
+                Party Package
+              </div>
+              <h3 className="font-display text-3xl md:text-4xl text-brand-teal uppercase font-bold mb-4 pr-8">
+                {selectedOffer.title}
+              </h3>
+              {selectedOffer.price_info && (
+                <div className="text-xl font-bold text-gray-800 mb-4 inline-block bg-white px-4 py-2 border-2 border-brand-teal/20 rounded-md shadow-sm">
+                  {selectedOffer.price_info}
+                </div>
+              )}
+              <div className="w-16 h-1 bg-brand-yellow mb-6"></div>
+              <p className="font-sans text-gray-700 leading-relaxed whitespace-pre-wrap">
+                {selectedOffer.description}
+              </p>
+              
+              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-graph-paper via-graph-paper to-transparent text-center border-t border-brand-teal/10">
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setSelectedOffer(null); setEnquireOffer(selectedOffer.title); }}
+                  className="w-full bg-brand-teal text-brand-yellow font-bold py-4 rounded-xl shadow-lg hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-wide"
+                >
+                  <Mail size={18} /> Enquire About This Package
+                </button>
+              </div>
             </div>
           </div>
         </div>

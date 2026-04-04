@@ -30,16 +30,6 @@ const OurOfferings: React.FC = () => {
 
   return (
     <section id="offerings" className="py-20 relative overflow-hidden">
-      <style>{`
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
-      
       {/* Dreamy background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-brand-cream via-white to-brand-cream pointer-events-none"></div>
       <div className="absolute top-0 left-0 w-72 h-72 bg-brand-yellow/10 rounded-full blur-[100px] -translate-x-1/3 -translate-y-1/3"></div>
@@ -69,12 +59,12 @@ const OurOfferings: React.FC = () => {
             <p className="text-gray-400 font-sans text-lg">Our offerings are being curated. Check back soon!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 gap-8 pb-8 no-scrollbar">
             {offerings.map((offering, idx) => (
               <div
                 key={offering.id}
                 onClick={() => setSelectedOffering(offering)}
-                className="group relative bg-white cursor-pointer rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-brand-teal/5 hover:border-brand-yellow/30 transform hover:-translate-y-2"
+                className="group relative bg-white cursor-pointer rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-brand-teal/5 hover:border-brand-yellow/30 transform hover:-translate-y-2 min-w-[85vw] sm:min-w-[60vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink"
                 style={{ animationDelay: `${idx * 100}ms` }}
               >
                 {/* Image */}
@@ -168,7 +158,7 @@ const OurOfferings: React.FC = () => {
             </div>
 
             {/* Modal Content */}
-            <div className="p-8 md:p-10 w-full bg-graph-paper overflow-y-auto hide-scrollbar flex-1">
+            <div className="p-8 md:p-10 w-full bg-graph-paper overflow-y-auto no-scrollbar flex-1">
               <div className="inline-block px-3 py-1 bg-brand-yellow text-brand-teal text-xs font-bold uppercase tracking-widest rounded-full mb-4 mt-2 md:mt-0">
                 Signature Offering
               </div>

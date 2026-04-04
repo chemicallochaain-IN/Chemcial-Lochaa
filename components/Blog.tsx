@@ -96,17 +96,17 @@ const Blog: React.FC<BlogProps> = ({ onViewPost }) => {
     {
       id: 'static-1', title: "From Telescopes to Tables: Our Journey",
       content: "How an astrophysicist and a forensic scientist decided to trade their labs for a kitchen. The physics behind a perfectly grilled burger.",
-      created_at: "2024-10-12", status: 'published' as const, slug: '', updated_at: '',
+      created_at: "2024-10-12", status: 'published' as const, slug: '', updated_at: '', cover_image_url: '',
     },
     {
       id: 'static-2', title: "The Chemistry of the Perfect Sauce",
       content: "We spent 3 months calibrating the viscosity and spice levels of our signature Makhni sauce. Here is the science behind the flavor.",
-      created_at: "2024-11-05", status: 'published' as const, slug: '', updated_at: '',
+      created_at: "2024-11-05", status: 'published' as const, slug: '', updated_at: '', cover_image_url: '',
     },
     {
       id: 'static-3', title: "Why 'Chemical Lochaa'?",
       content: "Lochaa means trouble, but in our lab, it means the good kind of chaos. Exploring the ethos behind our brand name.",
-      created_at: "2024-12-15", status: 'published' as const, slug: '', updated_at: '',
+      created_at: "2024-12-15", status: 'published' as const, slug: '', updated_at: '', cover_image_url: '',
     }
   ];
 
@@ -129,11 +129,11 @@ const Blog: React.FC<BlogProps> = ({ onViewPost }) => {
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-teal"></div>
           </div>
         ) : (
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-3 gap-6 lg:gap-8 pb-8 no-scrollbar">
             {displayPosts.slice(0, 6).map((post) => (
               <article
                 key={post.id}
-                className="flex flex-col h-full bg-brand-cream border border-brand-teal/20 rounded overflow-hidden hover:shadow-lg transition-shadow group"
+                className="flex flex-col h-full bg-brand-cream border border-brand-teal/20 rounded overflow-hidden hover:shadow-lg transition-shadow group min-w-[85vw] sm:min-w-[70vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink"
               >
                 {post.cover_image_url && (
                   <img
