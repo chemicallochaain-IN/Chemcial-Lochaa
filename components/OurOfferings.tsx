@@ -1,18 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Offering } from '../types';
 
 const OurOfferings: React.FC = () => {
   const [offerings, setOfferings] = useState<Offering[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expandedIds, setExpandedIds] = useState<string[]>([]);
-
-  const toggleExpand = (id: string) => {
-    setExpandedIds(prev => 
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-    );
-  };
+  const [selectedOffering, setSelectedOffering] = useState<Offering | null>(null);
 
   useEffect(() => {
     const fetchOfferings = async () => {
@@ -66,13 +60,10 @@ const OurOfferings: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {offerings.map((offering, idx) => {
-              const isExpanded = expandedIds.includes(offering.id);
-              
-              return (
+            {offerings.map((offering, idx) => (
               <div
                 key={offering.id}
-                onClick={() => toggleExpand(offering.id)}
+                onClick={() => setSelectedOffering(offering)}
                 className="group relative bg-white cursor-pointer rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-brand-teal/5 hover:border-brand-yellow/30 transform hover:-translate-y-2"
                 style={{ animationDelay: `${idx * 100}ms` }}
               >
@@ -107,15 +98,15 @@ const OurOfferings: React.FC = () => {
                   <h3 className="font-display text-2xl text-brand-teal uppercase font-bold mb-3 group-hover:text-brand-yellow transition-colors duration-300 tracking-wide">
                     {offering.name}
                   </h3>
-                  <div className="overflow-hidden transition-all duration-500 ease-in-out">
-                    <p className={`font-sans text-gray-600 leading-relaxed text-sm transition-all duration-500 ${isExpanded ? '' : 'line-clamp-4'}`}>
+                  <div className="overflow-hidden">
+                    <p className="font-sans text-gray-600 leading-relaxed text-sm line-clamp-4 whitespace-pre-wrap">
                       {offering.description}
                     </p>
                   </div>
                   
                   <div className="mt-2 text-right">
                     <span className="text-xs font-bold text-brand-teal uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      {isExpanded ? '- Show Less' : '+ Read More'}
+                      + Read More
                     </span>
                   </div>
 
@@ -131,10 +122,67 @@ const OurOfferings: React.FC = () => {
                 <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-brand-yellow/0 group-hover:border-brand-yellow/50 transition-colors duration-500 rounded-tl pointer-events-none"></div>
                 <div className="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-brand-yellow/0 group-hover:border-brand-yellow/50 transition-colors duration-500 rounded-br pointer-events-none"></div>
               </div>
-            )})}
+            ))}
           </div>
         )}
       </div>
+
+      {/* Modal Popup */}
+      {selectedOffering && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in"
+          onClick={() => setSelectedOffering(null)}
+        >
+          <div 
+            className="bg-brand-cream w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl relative animate-in zoom-in-95 duration-300 border-4 border-brand-teal"
+            onClick={e => e.stopPropagation()} // Prevent clicking inside modal from closing it
+          >
+            <button 
+              onClick={() => setSelectedOffering(null)}
+              className="absolute top-4 right-4 z-10 p-2 bg-brand-teal text-brand-yellow rounded-full hover:bg-brand-yellow hover:text-brand-teal transition-colors shadow-lg"
+            >
+              <X size={20} />
+            </button>
+            <div className="flex flex-col md:flex-row">
+              {/* Modal Image */}
+              <div className="md:w-2/5 bg-gradient-to-br from-brand-teal to-brand-teal/80 relative min-h-[200px] md:min-h-full flex-shrink-0">
+                {selectedOffering.image_url ? (
+                  <img
+                    src={selectedOffering.image_url}
+                    alt={selectedOffering.name}
+                    className="w-full h-full object-cover absolute inset-0"
+                  />
+                ) : (
+                  <div className="h-full flex items-center justify-center pt-12 md:pt-0">
+                    <Sparkles className="w-20 h-20 text-brand-yellow/30" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-teal/80 via-transparent to-transparent"></div>
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-8 md:p-12 md:w-3/5 bg-graph-paper">
+                <div className="inline-block px-3 py-1 bg-brand-yellow text-brand-teal text-xs font-bold uppercase tracking-widest rounded-full mb-4">
+                  Signature Offering
+                </div>
+                <h3 className="font-display text-3xl md:text-4xl text-brand-teal uppercase font-bold mb-6">
+                  {selectedOffering.name}
+                </h3>
+                <div className="w-16 h-1 bg-brand-yellow mb-6"></div>
+                <p className="font-sans text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  {selectedOffering.description}
+                </p>
+                
+                <div className="mt-10 flex items-center gap-4">
+                  <div className="h-[2px] flex-1 bg-gradient-to-r from-brand-teal/20 to-transparent"></div>
+                  <Sparkles className="w-5 h-5 text-brand-yellow" />
+                  <div className="h-[2px] flex-1 bg-gradient-to-l from-brand-teal/20 to-transparent"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
