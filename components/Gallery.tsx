@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { SiteImage } from '../types';
 
@@ -13,6 +13,8 @@ const FALLBACK_IMAGES = [
 
 const Gallery: React.FC = () => {
   const [images, setImages] = useState<Array<{ src: string; title: string; desc: string }>>(FALLBACK_IMAGES);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchGalleryImages = async () => {
@@ -45,6 +47,15 @@ const Gallery: React.FC = () => {
     return () => window.removeEventListener('siteImageUpdated', handleUpdate);
   }, []);
 
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const scrollLeft = scrollRef.current.scrollLeft;
+      const width = scrollRef.current.clientWidth;
+      const index = Math.round(scrollLeft / width);
+      setActiveIndex(index);
+    }
+  };
+
   return (
     <section id="gallery" className="py-20 bg-brand-cream relative">
       <div className="max-w-7xl mx-auto px-6">
@@ -55,9 +66,13 @@ const Gallery: React.FC = () => {
           <div className="h-1 w-20 bg-brand-yellow mx-auto mt-4"></div>
         </div>
 
-        <div className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8 no-scrollbar">
+        <div 
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8 no-scrollbar"
+        >
           {images.map((img, idx) => (
-            <div key={idx} className="group relative overflow-hidden rounded-lg shadow-md border-2 border-brand-teal/10 min-w-[85vw] sm:min-w-[60vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink">
+            <div key={idx} className="group relative overflow-hidden rounded-lg shadow-md border-2 border-brand-teal/10 min-w-full sm:min-w-[60vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink">
               <div className="aspect-w-4 aspect-h-3 bg-gray-200">
                 <img 
                   src={img.src} 
@@ -76,6 +91,23 @@ const Gallery: React.FC = () => {
             </div>
           ))}
         </div>
+
+        {/* Mobile Pagination Dots */}
+        {images.length > 1 && (
+          <div className="flex justify-center gap-2 mt-4 md:hidden">
+            {images.map((_, idx) => (
+              <div 
+                key={idx} 
+                onClick={() => {
+                  if (scrollRef.current) {
+                    scrollRef.current.scrollTo({ left: scrollRef.current.clientWidth * idx, behavior: 'smooth' });
+                  }
+                }}
+                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${activeIndex === idx ? 'w-6 bg-brand-teal' : 'w-2 bg-brand-yellow/60'}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

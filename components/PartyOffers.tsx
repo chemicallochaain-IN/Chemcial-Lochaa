@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { PartyOffer } from '../types';
 import { Mail, Gift, MessageCircle, X } from 'lucide-react';
@@ -9,6 +9,8 @@ const PartyOffers: React.FC = () => {
 
   const [enquireOffer, setEnquireOffer] = useState<string | null>(null);
   const [selectedOffer, setSelectedOffer] = useState<PartyOffer | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchOffers = async () => {
@@ -35,6 +37,15 @@ const PartyOffers: React.FC = () => {
     window.addEventListener('partyOfferUpdated', handleUpdate);
     return () => window.removeEventListener('partyOfferUpdated', handleUpdate);
   }, []);
+
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const scrollLeft = scrollRef.current.scrollLeft;
+      const width = scrollRef.current.clientWidth;
+      const index = Math.round(scrollLeft / width);
+      setActiveIndex(index);
+    }
+  };
 
   const handleWhatsApp = () => {
     if (!enquireOffer) return;
@@ -82,12 +93,16 @@ const PartyOffers: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 pb-8 no-scrollbar">
+        <div 
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 pb-8 no-scrollbar"
+        >
           {offers.map(offer => (
             <div 
               key={offer.id} 
               onClick={() => setSelectedOffer(offer)}
-              className="bg-brand-cream rounded-2xl overflow-hidden shadow-xl border-4 border-brand-teal flex flex-col transform hover:-translate-y-2 transition-all duration-300 hover:shadow-[0_20px_50px_rgba(1,68,91,0.3)] group cursor-pointer relative min-w-[85vw] sm:min-w-[60vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink"
+              className="bg-brand-cream rounded-2xl overflow-hidden shadow-xl border-4 border-brand-teal flex flex-col transform hover:-translate-y-2 transition-all duration-300 hover:shadow-[0_20px_50px_rgba(1,68,91,0.3)] group cursor-pointer relative min-w-full sm:min-w-[60vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink"
             >
               {offer.image_url ? (
                 <div className="relative h-48 md:h-56 overflow-hidden bg-brand-teal/5">
@@ -145,6 +160,18 @@ const PartyOffers: React.FC = () => {
             </div>
           ))}
         </div>
+
+        {/* Mobile Pagination Dots */}
+        {offers.length > 1 && (
+          <div className="flex justify-center gap-2 mt-4 mb-4 md:hidden">
+            {offers.map((_, idx) => (
+              <div 
+                key={idx} 
+                className={`h-2 rounded-full transition-all duration-300 ${activeIndex === idx ? 'w-6 bg-brand-teal' : 'w-2 bg-brand-teal/30'}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Enquire Modal */}
@@ -208,7 +235,7 @@ const PartyOffers: React.FC = () => {
               )}
             </div>
 
-            <div className="p-8 md:p-10 w-full bg-graph-paper overflow-y-auto no-scrollbar flex-1 relative pb-24">
+            <div className="p-8 md:p-10 w-full bg-graph-paper overflow-y-auto no-scrollbar flex-1 relative">
               <div className="inline-block px-3 py-1 bg-brand-yellow text-brand-teal text-xs font-bold uppercase tracking-widest rounded-full mb-4">
                 Party Package
               </div>
@@ -224,15 +251,16 @@ const PartyOffers: React.FC = () => {
               <p className="font-sans text-gray-700 leading-relaxed whitespace-pre-wrap">
                 {selectedOffer.description}
               </p>
+            </div>
               
-              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-graph-paper via-graph-paper to-transparent text-center border-t border-brand-teal/10">
-                <button 
-                  onClick={(e) => { e.stopPropagation(); setSelectedOffer(null); setEnquireOffer(selectedOffer.title); }}
-                  className="w-full bg-brand-teal text-brand-yellow font-bold py-4 rounded-xl shadow-lg hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-wide"
-                >
-                  <Mail size={18} /> Enquire About This Package
-                </button>
-              </div>
+            {/* Modal Fixed Footer */}
+            <div className="p-6 bg-graph-paper border-t border-brand-teal/10 mt-auto">
+              <button 
+                onClick={(e) => { e.stopPropagation(); setSelectedOffer(null); setEnquireOffer(selectedOffer.title); }}
+                className="w-full bg-brand-teal text-brand-yellow font-bold py-4 rounded-xl shadow-lg hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-wide"
+              >
+                <Mail size={18} /> Enquire About This Package
+              </button>
             </div>
           </div>
         </div>

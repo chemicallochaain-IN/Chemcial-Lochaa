@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Sparkles, Loader2, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Offering } from '../types';
@@ -7,6 +7,8 @@ const OurOfferings: React.FC = () => {
   const [offerings, setOfferings] = useState<Offering[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOffering, setSelectedOffering] = useState<Offering | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchOfferings = async () => {
@@ -27,6 +29,15 @@ const OurOfferings: React.FC = () => {
 
     fetchOfferings();
   }, []);
+
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const scrollLeft = scrollRef.current.scrollLeft;
+      const width = scrollRef.current.clientWidth;
+      const index = Math.round(scrollLeft / width);
+      setActiveIndex(index);
+    }
+  };
 
   return (
     <section id="offerings" className="py-20 relative overflow-hidden">
@@ -59,14 +70,19 @@ const OurOfferings: React.FC = () => {
             <p className="text-gray-400 font-sans text-lg">Our offerings are being curated. Check back soon!</p>
           </div>
         ) : (
-          <div className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 gap-8 pb-8 no-scrollbar">
-            {offerings.map((offering, idx) => (
-              <div
-                key={offering.id}
-                onClick={() => setSelectedOffering(offering)}
-                className="group relative bg-white cursor-pointer rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-brand-teal/5 hover:border-brand-yellow/30 transform hover:-translate-y-2 min-w-[85vw] sm:min-w-[60vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink"
-                style={{ animationDelay: `${idx * 100}ms` }}
-              >
+          <div>
+            <div 
+              ref={scrollRef}
+              onScroll={handleScroll}
+              className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 gap-8 pb-8 no-scrollbar"
+            >
+              {offerings.map((offering, idx) => (
+                <div
+                  key={offering.id}
+                  onClick={() => setSelectedOffering(offering)}
+                  className="group relative bg-white cursor-pointer rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-brand-teal/5 hover:border-brand-yellow/30 transform hover:-translate-y-2 min-w-full sm:min-w-[60vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink"
+                  style={{ animationDelay: `${idx * 100}ms` }}
+                >
                 {/* Image */}
                 <div className="relative h-64 overflow-hidden bg-gradient-to-br from-brand-cream to-brand-teal/5">
                   {offering.image_url ? (
@@ -123,6 +139,24 @@ const OurOfferings: React.FC = () => {
                 <div className="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-brand-yellow/0 group-hover:border-brand-yellow/50 transition-colors duration-500 rounded-br pointer-events-none"></div>
               </div>
             ))}
+            </div>
+
+            {/* Mobile Pagination Dots */}
+            {offerings.length > 1 && (
+              <div className="flex justify-center gap-2 mt-4 md:hidden">
+                {offerings.map((_, idx) => (
+                  <div 
+                    key={idx} 
+                    onClick={() => {
+                      if (scrollRef.current) {
+                        scrollRef.current.scrollTo({ left: scrollRef.current.clientWidth * idx, behavior: 'smooth' });
+                      }
+                    }}
+                    className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${activeIndex === idx ? 'w-6 bg-brand-teal' : 'w-2 bg-brand-teal/30'}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

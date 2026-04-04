@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowRight, Calendar, ArrowLeft, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { BlogPost } from '../types';
@@ -11,6 +11,8 @@ const Blog: React.FC<BlogProps> = ({ onViewPost }) => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchPosts();
@@ -35,6 +37,15 @@ const Blog: React.FC<BlogProps> = ({ onViewPost }) => {
   const getReadTime = (html: string) => {
     const words = html.replace(/<[^>]+>/g, '').split(/\s+/).length;
     return Math.max(1, Math.ceil(words / 200));
+  };
+
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const scrollLeft = scrollRef.current.scrollLeft;
+      const width = scrollRef.current.clientWidth;
+      const index = Math.round(scrollLeft / width);
+      setActiveIndex(index);
+    }
   };
 
   // ─── Full Post View ───
@@ -129,12 +140,17 @@ const Blog: React.FC<BlogProps> = ({ onViewPost }) => {
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-teal"></div>
           </div>
         ) : (
-          <div className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-3 gap-6 lg:gap-8 pb-8 no-scrollbar">
-            {displayPosts.slice(0, 6).map((post) => (
-              <article
-                key={post.id}
-                className="flex flex-col h-full bg-brand-cream border border-brand-teal/20 rounded overflow-hidden hover:shadow-lg transition-shadow group min-w-[85vw] sm:min-w-[70vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink"
-              >
+          <div>
+            <div 
+              ref={scrollRef}
+              onScroll={handleScroll}
+              className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-3 gap-6 lg:gap-8 pb-8 no-scrollbar"
+            >
+              {displayPosts.slice(0, 6).map((post) => (
+                <article
+                  key={post.id}
+                  className="flex flex-col h-full bg-brand-cream border border-brand-teal/20 rounded overflow-hidden hover:shadow-lg transition-shadow group min-w-full sm:min-w-[70vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink"
+                >
                 {post.cover_image_url && (
                   <img
                     src={post.cover_image_url}
@@ -167,8 +183,26 @@ const Blog: React.FC<BlogProps> = ({ onViewPost }) => {
                     )}
                   </div>
                 </div>
-              </article>
-            ))}
+                </article>
+              ))}
+            </div>
+
+            {/* Mobile Pagination Dots */}
+            {displayPosts.length > 1 && (
+              <div className="flex justify-center gap-2 mt-4 md:hidden">
+                {displayPosts.slice(0, 6).map((_, idx) => (
+                  <div 
+                    key={idx} 
+                    onClick={() => {
+                      if (scrollRef.current) {
+                        scrollRef.current.scrollTo({ left: scrollRef.current.clientWidth * idx, behavior: 'smooth' });
+                      }
+                    }}
+                    className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${activeIndex === idx ? 'w-6 bg-brand-teal' : 'w-2 bg-brand-teal/30'}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
