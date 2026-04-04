@@ -149,7 +149,7 @@ const Blog: React.FC<BlogProps> = ({ onViewPost }) => {
               {displayPosts.slice(0, 6).map((post) => (
                 <article
                   key={post.id}
-                  className="flex flex-col h-full bg-brand-cream border border-brand-teal/20 rounded overflow-hidden hover:shadow-lg transition-shadow group min-w-full sm:min-w-[70vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink"
+                  className="flex flex-col h-full bg-brand-cream border border-brand-teal/20 rounded overflow-hidden hover:shadow-lg transition-shadow group w-[calc(100vw-3rem)] sm:w-[70vw] md:w-auto snap-center flex-shrink-0 md:flex-shrink"
                 >
                 {post.cover_image_url && (
                   <img

@@ -80,7 +80,7 @@ const OurOfferings: React.FC = () => {
                 <div
                   key={offering.id}
                   onClick={() => setSelectedOffering(offering)}
-                  className="group relative bg-white cursor-pointer rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-brand-teal/5 hover:border-brand-yellow/30 transform hover:-translate-y-2 min-w-full sm:min-w-[60vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink"
+                  className="group relative bg-white cursor-pointer rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-brand-teal/5 hover:border-brand-yellow/30 transform hover:-translate-y-2 w-[calc(100vw-2rem)] sm:w-[60vw] md:w-auto snap-center flex-shrink-0 md:flex-shrink"
                   style={{ animationDelay: `${idx * 100}ms` }}
                 >
                 {/* Image */}

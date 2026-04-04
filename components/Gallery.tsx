@@ -72,7 +72,7 @@ const Gallery: React.FC = () => {
           className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8 no-scrollbar"
         >
           {images.map((img, idx) => (
-            <div key={idx} className="group relative overflow-hidden rounded-lg shadow-md border-2 border-brand-teal/10 min-w-full sm:min-w-[60vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink">
+            <div key={idx} className="group relative overflow-hidden rounded-lg shadow-md border-2 border-brand-teal/10 w-[calc(100vw-3rem)] sm:w-[60vw] md:w-auto snap-center flex-shrink-0 md:flex-shrink">
               <div className="aspect-w-4 aspect-h-3 bg-gray-200">
                 <img 
                   src={img.src} 

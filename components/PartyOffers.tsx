@@ -102,7 +102,7 @@ const PartyOffers: React.FC = () => {
             <div 
               key={offer.id} 
               onClick={() => setSelectedOffer(offer)}
-              className="bg-brand-cream rounded-2xl overflow-hidden shadow-xl border-4 border-brand-teal flex flex-col transform hover:-translate-y-2 transition-all duration-300 hover:shadow-[0_20px_50px_rgba(1,68,91,0.3)] group cursor-pointer relative min-w-full sm:min-w-[60vw] md:min-w-0 snap-center flex-shrink-0 md:flex-shrink"
+              className="bg-brand-cream rounded-2xl overflow-hidden shadow-xl border-4 border-brand-teal flex flex-col transform hover:-translate-y-2 transition-all duration-300 hover:shadow-[0_20px_50px_rgba(1,68,91,0.3)] group cursor-pointer relative w-[calc(100vw-3rem)] sm:w-[60vw] md:w-auto snap-center flex-shrink-0 md:flex-shrink"
             >
               {offer.image_url ? (
                 <div className="relative h-48 md:h-56 overflow-hidden bg-brand-teal/5">
