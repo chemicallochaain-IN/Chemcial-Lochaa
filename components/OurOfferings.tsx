@@ -6,6 +6,13 @@ import { Offering } from '../types';
 const OurOfferings: React.FC = () => {
   const [offerings, setOfferings] = useState<Offering[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedIds, setExpandedIds] = useState<string[]>([]);
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
 
   useEffect(() => {
     const fetchOfferings = async () => {
@@ -59,10 +66,14 @@ const OurOfferings: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {offerings.map((offering, idx) => (
+            {offerings.map((offering, idx) => {
+              const isExpanded = expandedIds.includes(offering.id);
+              
+              return (
               <div
                 key={offering.id}
-                className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-brand-teal/5 hover:border-brand-yellow/30 transform hover:-translate-y-2"
+                onClick={() => toggleExpand(offering.id)}
+                className="group relative bg-white cursor-pointer rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-brand-teal/5 hover:border-brand-yellow/30 transform hover:-translate-y-2"
                 style={{ animationDelay: `${idx * 100}ms` }}
               >
                 {/* Image */}
@@ -96,9 +107,17 @@ const OurOfferings: React.FC = () => {
                   <h3 className="font-display text-2xl text-brand-teal uppercase font-bold mb-3 group-hover:text-brand-yellow transition-colors duration-300 tracking-wide">
                     {offering.name}
                   </h3>
-                  <p className="font-sans text-gray-600 leading-relaxed text-sm line-clamp-4">
-                    {offering.description}
-                  </p>
+                  <div className="overflow-hidden transition-all duration-500 ease-in-out">
+                    <p className={`font-sans text-gray-600 leading-relaxed text-sm transition-all duration-500 ${isExpanded ? '' : 'line-clamp-4'}`}>
+                      {offering.description}
+                    </p>
+                  </div>
+                  
+                  <div className="mt-2 text-right">
+                    <span className="text-xs font-bold text-brand-teal uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      {isExpanded ? '- Show Less' : '+ Read More'}
+                    </span>
+                  </div>
 
                   {/* Bottom decorative element */}
                   <div className="mt-4 flex items-center gap-2">
@@ -109,10 +128,10 @@ const OurOfferings: React.FC = () => {
                 </div>
 
                 {/* Corner decorations */}
-                <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-brand-yellow/0 group-hover:border-brand-yellow/50 transition-colors duration-500 rounded-tl"></div>
-                <div className="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-brand-yellow/0 group-hover:border-brand-yellow/50 transition-colors duration-500 rounded-br"></div>
+                <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-brand-yellow/0 group-hover:border-brand-yellow/50 transition-colors duration-500 rounded-tl pointer-events-none"></div>
+                <div className="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-brand-yellow/0 group-hover:border-brand-yellow/50 transition-colors duration-500 rounded-br pointer-events-none"></div>
               </div>
-            ))}
+            )})}
           </div>
         )}
       </div>
