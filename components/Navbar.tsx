@@ -17,8 +17,8 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenOrder, onNavigate, currentView, u
   const navLinks = [
     { name: 'Home', href: '#home' },
     { name: 'Story', href: '#story' },
-    { name: 'Services', href: '#services' },
     { name: 'Offerings', href: '#offerings' },
+    { name: 'Events', href: '#events' },
     { name: 'Gallery', href: '#gallery' },
     { name: 'Franchise', href: '#franchise' },
     { name: 'Blog', href: '#blog' },

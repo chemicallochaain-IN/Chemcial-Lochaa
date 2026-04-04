@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import {
   LayoutDashboard, ShoppingBag, Users, UtensilsCrossed,
   MessageSquare, BarChart3, Settings, Search, CheckCircle,
@@ -15,12 +16,13 @@ import EventsTab from './admin/EventsTab';
 import FranchiseTab from './admin/FranchiseTab';
 import ImageManagerTab from './admin/ImageManagerTab';
 import OfferingsTab from './admin/OfferingsTab';
+import PartyOffersTab from './admin/PartyOffersTab';
 
 interface AdminDashboardProps {
   user: User;
 }
 
-type TabType = 'dashboard' | 'orders' | 'menu' | 'customers' | 'team' | 'messages' | 'merch' | 'events' | 'rewards' | 'blog' | 'franchise' | 'images' | 'offerings';
+type TabType = 'dashboard' | 'orders' | 'menu' | 'customers' | 'team' | 'messages' | 'merch' | 'events' | 'rewards' | 'blog' | 'franchise' | 'images' | 'offerings' | 'party_offers';
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
@@ -447,15 +449,30 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
     const handleCreateEmployee = async (e: React.FormEvent) => {
       e.preventDefault();
       try {
-        // Using RPC function to create user without logging out admin
-        const { error } = await supabase.rpc('create_employee', {
-          email: newEmployee.email,
-          password: newEmployee.password,
-          full_name: newEmployee.name,
-          is_admin_role: newEmployee.isAdmin
+        // Use a secondary client to sign up the user so the current admin doesn't get logged out
+        const adminAuthClient = createClient(supabaseUrl, supabaseAnonKey, {
+          auth: { autoRefreshToken: false, persistSession: false }
         });
 
-        if (error) throw error;
+        const { data: authData, error: authError } = await adminAuthClient.auth.signUp({
+          email: newEmployee.email,
+          password: newEmployee.password,
+        });
+
+        if (authError) throw authError;
+
+        if (authData.user) {
+          // Insert the profile manually since the user was just created
+          const { error: profileError } = await supabase.from('profiles').insert({
+             id: authData.user.id,
+             name: newEmployee.name,
+             email: newEmployee.email,
+             is_admin: newEmployee.isAdmin,
+             loyalty_points: 0
+          });
+
+          if (profileError) throw profileError;
+        }
 
         alert('User created successfully');
         setIsAdding(false);
@@ -888,6 +905,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
             { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
             { id: 'orders', label: 'Live Orders', icon: ShoppingBag },
             { id: 'offerings', label: 'Our Offerings', icon: Sparkles },
+            { id: 'party_offers', label: 'Party Offers', icon: Gift },
             { id: 'images', label: 'Image Manager', icon: Image },
             { id: 'menu', label: 'Menu & Prices', icon: UtensilsCrossed },
             { id: 'blog', label: 'Blog', icon: FileText },
@@ -922,11 +940,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
           </div>
         ) : (
           <>
-            {activeTab === 'dashboard' && <DashboardTab />}
-            {activeTab === 'orders' && <OrdersTab />}
-            {activeTab === 'offerings' && <OfferingsTab />}
-            {activeTab === 'images' && <ImageManagerTab />}
-            {activeTab === 'menu' && <MenuTab />}
+            { activeTab === 'dashboard' && <DashboardTab /> }
+            { activeTab === 'orders' && <OrdersTab /> }
+            { activeTab === 'offerings' && <OfferingsTab /> }
+            { activeTab === 'party_offers' && <PartyOffersTab /> }
+            { activeTab === 'images' && <ImageManagerTab /> }
+            { activeTab === 'menu' && <MenuTab /> }
             {activeTab === 'blog' && <BlogTab />}
             {activeTab === 'customers' && <CustomersTab />}
             {activeTab === 'team' && <TeamTab />}

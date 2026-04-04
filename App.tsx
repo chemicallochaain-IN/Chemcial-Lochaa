@@ -20,6 +20,7 @@ import FeedbackSection from './components/FeedbackSection';
 import { User } from './types';
 import { supabase } from './lib/supabase';
 import { useSiteImage } from './hooks/useSiteImage';
+import PartyOffers from './components/PartyOffers';
 
 function App() {
   // const [isOrderOpen, setIsOrderOpen] = useState(false); // [DISABLED] Online ordering turned off
@@ -139,6 +140,7 @@ function App() {
             <Hero />
             <About />
             <Services />
+            <PartyOffers />
             {/* <MenuSection /> [DISABLED] Replaced by Our Offerings */}
             <OurOfferings />
             <Gallery />
