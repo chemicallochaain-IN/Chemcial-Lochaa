@@ -144,7 +144,7 @@ const OurOfferings: React.FC = () => {
           onClick={() => setSelectedOffering(null)}
         >
           <div 
-            className="bg-brand-cream w-full max-w-4xl max-h-[90vh] rounded-3xl shadow-2xl relative animate-in zoom-in-95 duration-300 border-4 border-brand-teal overflow-hidden flex flex-col md:flex-row"
+            className="bg-brand-cream w-full max-w-2xl max-h-[90vh] rounded-3xl shadow-2xl relative animate-in zoom-in-95 duration-300 border-4 border-brand-teal overflow-hidden flex flex-col"
             onClick={e => e.stopPropagation()} // Prevent clicking inside modal from closing it
           >
             <button 
@@ -155,12 +155,12 @@ const OurOfferings: React.FC = () => {
             </button>
             
             {/* Modal Image */}
-            <div className="md:w-2/5 bg-brand-teal/5 relative min-h-[250px] md:min-h-full flex-shrink-0 flex items-center justify-center p-6 md:p-8">
+            <div className="w-full bg-brand-teal/5 relative h-64 md:h-80 flex-shrink-0 flex items-center justify-center p-0">
               {selectedOffering.image_url ? (
                 <img
                   src={selectedOffering.image_url}
                   alt={selectedOffering.name}
-                  className="w-full h-full max-h-[30vh] md:max-h-[80vh] object-contain drop-shadow-xl"
+                  className="w-full h-full object-cover object-center"
                 />
               ) : (
                 <Sparkles className="w-20 h-20 text-brand-yellow/30" />
@@ -168,7 +168,7 @@ const OurOfferings: React.FC = () => {
             </div>
 
             {/* Modal Content */}
-            <div className="p-8 md:p-12 md:w-3/5 bg-graph-paper overflow-y-auto hide-scrollbar max-h-[60vh] md:max-h-[90vh]">
+            <div className="p-8 md:p-10 w-full bg-graph-paper overflow-y-auto hide-scrollbar flex-1">
               <div className="inline-block px-3 py-1 bg-brand-yellow text-brand-teal text-xs font-bold uppercase tracking-widest rounded-full mb-4 mt-2 md:mt-0">
                 Signature Offering
               </div>
