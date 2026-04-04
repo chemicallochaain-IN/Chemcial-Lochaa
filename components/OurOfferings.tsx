@@ -30,6 +30,16 @@ const OurOfferings: React.FC = () => {
 
   return (
     <section id="offerings" className="py-20 relative overflow-hidden">
+      <style>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+      
       {/* Dreamy background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-brand-cream via-white to-brand-cream pointer-events-none"></div>
       <div className="absolute top-0 left-0 w-72 h-72 bg-brand-yellow/10 rounded-full blur-[100px] -translate-x-1/3 -translate-y-1/3"></div>
@@ -130,54 +140,50 @@ const OurOfferings: React.FC = () => {
       {/* Modal Popup */}
       {selectedOffering && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-black/60 backdrop-blur-sm animate-in fade-in"
           onClick={() => setSelectedOffering(null)}
         >
           <div 
-            className="bg-brand-cream w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl relative animate-in zoom-in-95 duration-300 border-4 border-brand-teal"
+            className="bg-brand-cream w-full max-w-4xl max-h-[90vh] rounded-3xl shadow-2xl relative animate-in zoom-in-95 duration-300 border-4 border-brand-teal overflow-hidden flex flex-col md:flex-row"
             onClick={e => e.stopPropagation()} // Prevent clicking inside modal from closing it
           >
             <button 
               onClick={() => setSelectedOffering(null)}
-              className="absolute top-4 right-4 z-10 p-2 bg-brand-teal text-brand-yellow rounded-full hover:bg-brand-yellow hover:text-brand-teal transition-colors shadow-lg"
+              className="absolute top-4 right-4 z-20 p-2 bg-brand-teal text-brand-yellow rounded-full hover:bg-brand-yellow hover:text-brand-teal transition-colors shadow-lg"
             >
               <X size={20} />
             </button>
-            <div className="flex flex-col md:flex-row">
-              {/* Modal Image */}
-              <div className="md:w-2/5 bg-gradient-to-br from-brand-teal to-brand-teal/80 relative min-h-[200px] md:min-h-full flex-shrink-0">
-                {selectedOffering.image_url ? (
-                  <img
-                    src={selectedOffering.image_url}
-                    alt={selectedOffering.name}
-                    className="w-full h-full object-cover absolute inset-0"
-                  />
-                ) : (
-                  <div className="h-full flex items-center justify-center pt-12 md:pt-0">
-                    <Sparkles className="w-20 h-20 text-brand-yellow/30" />
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-teal/80 via-transparent to-transparent"></div>
-              </div>
+            
+            {/* Modal Image */}
+            <div className="md:w-2/5 bg-brand-teal/5 relative min-h-[250px] md:min-h-full flex-shrink-0 flex items-center justify-center p-6 md:p-8">
+              {selectedOffering.image_url ? (
+                <img
+                  src={selectedOffering.image_url}
+                  alt={selectedOffering.name}
+                  className="w-full h-full max-h-[30vh] md:max-h-[80vh] object-contain drop-shadow-xl"
+                />
+              ) : (
+                <Sparkles className="w-20 h-20 text-brand-yellow/30" />
+              )}
+            </div>
 
-              {/* Modal Content */}
-              <div className="p-8 md:p-12 md:w-3/5 bg-graph-paper">
-                <div className="inline-block px-3 py-1 bg-brand-yellow text-brand-teal text-xs font-bold uppercase tracking-widest rounded-full mb-4">
-                  Signature Offering
-                </div>
-                <h3 className="font-display text-3xl md:text-4xl text-brand-teal uppercase font-bold mb-6">
-                  {selectedOffering.name}
-                </h3>
-                <div className="w-16 h-1 bg-brand-yellow mb-6"></div>
-                <p className="font-sans text-gray-700 leading-relaxed whitespace-pre-wrap">
-                  {selectedOffering.description}
-                </p>
-                
-                <div className="mt-10 flex items-center gap-4">
-                  <div className="h-[2px] flex-1 bg-gradient-to-r from-brand-teal/20 to-transparent"></div>
-                  <Sparkles className="w-5 h-5 text-brand-yellow" />
-                  <div className="h-[2px] flex-1 bg-gradient-to-l from-brand-teal/20 to-transparent"></div>
-                </div>
+            {/* Modal Content */}
+            <div className="p-8 md:p-12 md:w-3/5 bg-graph-paper overflow-y-auto hide-scrollbar max-h-[60vh] md:max-h-[90vh]">
+              <div className="inline-block px-3 py-1 bg-brand-yellow text-brand-teal text-xs font-bold uppercase tracking-widest rounded-full mb-4 mt-2 md:mt-0">
+                Signature Offering
+              </div>
+              <h3 className="font-display text-3xl md:text-4xl text-brand-teal uppercase font-bold mb-6 pr-8">
+                {selectedOffering.name}
+              </h3>
+              <div className="w-16 h-1 bg-brand-yellow mb-6"></div>
+              <p className="font-sans text-gray-700 leading-relaxed whitespace-pre-wrap">
+                {selectedOffering.description}
+              </p>
+              
+              <div className="mt-10 flex items-center gap-4">
+                <div className="h-[2px] flex-1 bg-gradient-to-r from-brand-teal/20 to-transparent"></div>
+                <Sparkles className="w-5 h-5 text-brand-yellow" />
+                <div className="h-[2px] flex-1 bg-gradient-to-l from-brand-teal/20 to-transparent"></div>
               </div>
             </div>
           </div>
