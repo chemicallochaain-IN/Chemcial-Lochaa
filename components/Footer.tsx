@@ -53,8 +53,8 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </ul>
           </div>
 
-          {/* Order On */}
-           <div className="space-y-4">
+          {/* Order On section - DISABLED: online ordering turned off */}
+          {/* <div className="space-y-4">
              <h4 className="font-display text-xl text-white uppercase tracking-wide border-b border-brand-yellow/50 pb-2 inline-block">
               Order On
             </h4>
@@ -70,7 +70,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 </a>
               </li>
             </ul>
-          </div>
+          </div> */}
 
           {/* Contact */}
           <div className="space-y-4">

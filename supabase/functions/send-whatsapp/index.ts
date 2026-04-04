@@ -2,9 +2,9 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 // WhatsApp Cloud API configuration
 // Set these secrets via: supabase secrets set WHATSAPP_TOKEN=xxx WHATSAPP_PHONE_ID=xxx
-const WHATSAPP_TOKEN = Deno.env.get("WHATSAPP_TOKEN");
-const WHATSAPP_PHONE_ID = Deno.env.get("WHATSAPP_PHONE_ID");
-const WHATSAPP_API_URL = `https://graph.facebook.com/v18.0/${WHATSAPP_PHONE_ID}/messages`;
+const WHATSAPP_TOKEN = Deno.env.get("EAAXj8WgJV74BQ4754t4y00UNLuWdWlaKuabFkrVrluZA7l68G7h40CnqStblKn154WyFrjh54GKREMKkS46JyUTcmrt19lrcGSnuX2AWDA7Mczgtfe8zlx08f8OQxPfZCRvwadSKbIX7m2ZCDvimoT7fnHw4IQOXl9reUhHqDQvGr5PlvAvcEcNcoH0PDkED5XV8LREifP62UOqQvypWlUgYf0BXcZAGiDCyyKnl");
+const WHATSAPP_PHONE_ID = Deno.env.get("681705745027502");
+const WHATSAPP_API_URL = `https://graph.facebook.com/v18.0/${681705745027502}/messages`;
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",

@@ -1,15 +1,45 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
+import { SiteImage } from '../types';
+
+const FALLBACK_IMAGES = [
+  { src: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=800", title: "The Experimental Burger", desc: "Our signature patty formulation" },
+  { src: "https://images.unsplash.com/photo-1551183053-bf91b1dca034?auto=format&fit=crop&q=80&w=800", title: "Makhni Pasta", desc: "Fusion at molecular level" },
+  { src: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&q=80&w=800", title: "Korean Fried Chicken", desc: "Spicy chemical reaction" },
+  { src: "https://images.unsplash.com/photo-1561758033-d8f5376f17ea?auto=format&fit=crop&q=80&w=800", title: "Loaded Fries", desc: "Calculated chaos" },
+  { src: "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?auto=format&fit=crop&q=80&w=800", title: "Momos Experiment", desc: "Steamed to perfection" },
+  { src: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&q=80&w=800", title: "Hazelnut Coffee", desc: "Liquid energy" },
+];
 
 const Gallery: React.FC = () => {
-  // Mock images using placeholders
-  const images = [
-    { src: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=800", title: "The Experimental Burger", desc: "Our signature patty formulation" },
-    { src: "https://images.unsplash.com/photo-1551183053-bf91b1dca034?auto=format&fit=crop&q=80&w=800", title: "Makhni Pasta", desc: "Fusion at molecular level" },
-    { src: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&q=80&w=800", title: "Korean Fried Chicken", desc: "Spicy chemical reaction" },
-    { src: "https://images.unsplash.com/photo-1561758033-d8f5376f17ea?auto=format&fit=crop&q=80&w=800", title: "Loaded Fries", desc: "Calculated chaos" },
-    { src: "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?auto=format&fit=crop&q=80&w=800", title: "Momos Experiment", desc: "Steamed to perfection" },
-    { src: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&q=80&w=800", title: "Hazelnut Coffee", desc: "Liquid energy" },
-  ];
+  const [images, setImages] = useState<Array<{ src: string; title: string; desc: string }>>(FALLBACK_IMAGES);
+
+  useEffect(() => {
+    const fetchGalleryImages = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('site_images')
+          .select('*')
+          .like('image_key', 'gallery_%')
+          .order('sort_order');
+
+        if (!error && data && data.length > 0) {
+          const dbImages = (data as SiteImage[]).map(img => ({
+            src: img.image_url,
+            title: img.title || 'Gallery',
+            desc: img.description || ''
+          }));
+          setImages(dbImages);
+        }
+        // If no DB images, fallback images remain
+      } catch (err) {
+        console.error('Error loading gallery images:', err);
+        // Fallback images remain
+      }
+    };
+
+    fetchGalleryImages();
+  }, []);
 
   return (
     <section id="gallery" className="py-20 bg-brand-cream relative">

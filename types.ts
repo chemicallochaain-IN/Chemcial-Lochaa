@@ -128,3 +128,25 @@ export interface Franchise {
   notes?: string;
   created_at: string;
 }
+
+export interface SiteImage {
+  id: string;
+  image_key: string;
+  image_url: string;
+  title?: string;
+  description?: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Offering {
+  id: string;
+  name: string;
+  description: string;
+  image_url?: string;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}

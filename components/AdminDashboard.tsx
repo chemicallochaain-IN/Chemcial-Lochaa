@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard, ShoppingBag, Users, UtensilsCrossed,
   MessageSquare, BarChart3, Settings, Search, CheckCircle,
-  XCircle, Clock, ChefHat, Truck, Edit2, Plus, Trash2, Gift, Shirt, Calendar, UserPlus, Shield, FolderPlus, Send, FileText, Store, Mail, Loader2
+  XCircle, Clock, ChefHat, Truck, Edit2, Plus, Trash2, Gift, Shirt, Calendar, UserPlus, Shield, FolderPlus, Send, FileText, Store, Mail, Loader2, Image, Sparkles
 } from 'lucide-react';
 import { supabase, supabaseUrl, supabaseAnonKey } from '../lib/supabase';
 import { User, Order, ContactMessage, MessageReply, MenuCategory, MenuItem } from '../types';
@@ -13,12 +13,14 @@ import RewardsTab from './admin/RewardsTab';
 import MerchTab from './admin/MerchTab';
 import EventsTab from './admin/EventsTab';
 import FranchiseTab from './admin/FranchiseTab';
+import ImageManagerTab from './admin/ImageManagerTab';
+import OfferingsTab from './admin/OfferingsTab';
 
 interface AdminDashboardProps {
   user: User;
 }
 
-type TabType = 'dashboard' | 'orders' | 'menu' | 'customers' | 'team' | 'messages' | 'merch' | 'events' | 'rewards' | 'blog' | 'franchise';
+type TabType = 'dashboard' | 'orders' | 'menu' | 'customers' | 'team' | 'messages' | 'merch' | 'events' | 'rewards' | 'blog' | 'franchise' | 'images' | 'offerings';
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
@@ -885,6 +887,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
           {[
             { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
             { id: 'orders', label: 'Live Orders', icon: ShoppingBag },
+            { id: 'offerings', label: 'Our Offerings', icon: Sparkles },
+            { id: 'images', label: 'Image Manager', icon: Image },
             { id: 'menu', label: 'Menu & Prices', icon: UtensilsCrossed },
             { id: 'blog', label: 'Blog', icon: FileText },
             { id: 'customers', label: 'Customers', icon: Users },
@@ -920,6 +924,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
           <>
             {activeTab === 'dashboard' && <DashboardTab />}
             {activeTab === 'orders' && <OrdersTab />}
+            {activeTab === 'offerings' && <OfferingsTab />}
+            {activeTab === 'images' && <ImageManagerTab />}
             {activeTab === 'menu' && <MenuTab />}
             {activeTab === 'blog' && <BlogTab />}
             {activeTab === 'customers' && <CustomersTab />}

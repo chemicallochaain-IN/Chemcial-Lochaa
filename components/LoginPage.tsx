@@ -137,7 +137,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isAdminLogin = false, on
 
         {!isAdminLogin && (
           <div className="mt-8 text-center border-t border-brand-teal/10 pt-6">
-            <p className="text-sm text-gray-600 font-sans">
+            {/* Self-registration DISABLED - Join Now link hidden */}
+            {/* <p className="text-sm text-gray-600 font-sans">
               Don't have an account yet?
               <button 
                 onClick={() => onNavigate && onNavigate('register')}
@@ -145,7 +146,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, isAdminLogin = false, on
               >
                 Join Now
               </button>
-            </p>
+            </p> */}
           </div>
         )}
       </div>

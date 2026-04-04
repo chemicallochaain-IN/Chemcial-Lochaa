@@ -3,8 +3,9 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
 import Services from './components/Services';
-import MenuSection from './components/MenuSection';
-import OrderOnline from './components/OrderOnline';
+// import MenuSection from './components/MenuSection'; // [DISABLED] Replaced by Offerings
+import OurOfferings from './components/OurOfferings';
+// import OrderOnline from './components/OrderOnline'; // [DISABLED] Online ordering turned off
 import Gallery from './components/Gallery';
 import Blog from './components/Blog';
 import Franchise from './components/Franchise';
@@ -13,15 +14,15 @@ import Footer from './components/Footer';
 import BackgroundDoodles from './components/BackgroundDoodles';
 import LoginPage from './components/LoginPage';
 import MyLab from './components/MyLab';
-import RegisterPage from './components/RegisterPage';
+// import RegisterPage from './components/RegisterPage'; // [DISABLED] Self-registration turned off
 import AdminDashboard from './components/AdminDashboard';
 import FeedbackSection from './components/FeedbackSection';
 import { User } from './types';
 import { supabase } from './lib/supabase';
 
 function App() {
-  const [isOrderOpen, setIsOrderOpen] = useState(false);
-  const [currentView, setCurrentView] = useState<'home' | 'login' | 'register' | 'mylab' | 'admin' | 'adminLogin'>('home');
+  // const [isOrderOpen, setIsOrderOpen] = useState(false); // [DISABLED] Online ordering turned off
+  const [currentView, setCurrentView] = useState<'home' | 'login' | 'mylab' | 'admin' | 'adminLogin'>('home');
   const [user, setUser] = useState<User | null>(null);
 
   // Initialize Auth Listener
@@ -106,12 +107,12 @@ function App() {
     <div className="min-h-screen bg-graph-paper font-sans text-brand-teal relative selection:bg-brand-yellow selection:text-brand-teal">
       <BackgroundDoodles />
       
-      {/* Order Overlay */}
-      <OrderOnline isOpen={isOrderOpen} onClose={() => setIsOrderOpen(false)} />
+      {/* Order Overlay - DISABLED: online ordering turned off */}
+      {/* <OrderOnline isOpen={isOrderOpen} onClose={() => setIsOrderOpen(false)} /> */}
 
       <div className="relative z-10">
         <Navbar 
-          onOpenOrder={() => setIsOrderOpen(true)} 
+          onOpenOrder={() => {}} 
           onNavigate={setCurrentView}
           currentView={currentView}
           user={user}
@@ -122,7 +123,8 @@ function App() {
             <Hero />
             <About />
             <Services />
-            <MenuSection />
+            {/* <MenuSection /> [DISABLED] Replaced by Our Offerings */}
+            <OurOfferings />
             <Gallery />
             <Franchise />
             <Blog />
@@ -135,12 +137,13 @@ function App() {
           <LoginPage onLogin={() => {}} onNavigate={setCurrentView} />
         )}
 
-        {currentView === 'register' && (
+        {/* Registration route DISABLED - self-registration turned off */}
+        {/* {currentView === 'register' && (
           <RegisterPage 
             onSuccess={() => setCurrentView('login')} 
             onBackToLogin={() => setCurrentView('login')} 
           />
-        )}
+        )} */}
 
         {currentView === 'adminLogin' && (
           <LoginPage onLogin={() => {}} isAdminLogin={true} onNavigate={setCurrentView} />
@@ -150,7 +153,7 @@ function App() {
           <MyLab 
             user={user} 
             onLogout={handleLogout} 
-            onOpenOrder={() => setIsOrderOpen(true)}
+            onOpenOrder={() => {}} // [DISABLED] Online ordering turned off
           />
         )}
 
