@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { PartyOffer } from '../types';
-import { Mail, Gift } from 'lucide-react';
+import { Mail, Gift, MessageCircle, X } from 'lucide-react';
 
 const PartyOffers: React.FC = () => {
   const [offers, setOffers] = useState<PartyOffer[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [enquireOffer, setEnquireOffer] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOffers = async () => {
@@ -28,15 +30,26 @@ const PartyOffers: React.FC = () => {
 
     fetchOffers();
 
-    // Re-fetch globally if admin updates
     const handleUpdate = () => fetchOffers();
     window.addEventListener('partyOfferUpdated', handleUpdate);
     return () => window.removeEventListener('partyOfferUpdated', handleUpdate);
   }, []);
 
-  const handleEnquire = (offerTitle: string) => {
-    const message = encodeURIComponent(`Hi, I would like to enquire about the "${offerTitle}" package.`);
-    window.open(`https://wa.me/919999999999?text=${message}`, '_blank');
+  const handleWhatsApp = () => {
+    if (!enquireOffer) return;
+    const message = encodeURIComponent(`Hi, I would like to enquire about the "${enquireOffer}" package.`);
+    window.open(`https://wa.me/917206879847?text=${message}`, '_blank');
+    setEnquireOffer(null);
+  };
+
+  const handleContactForm = () => {
+    if (!enquireOffer) return;
+    const detail = {
+      subject: 'Book an Event / Party',
+      message: `I would like to enquire about the "${enquireOffer}" package.\n\nAdditional Details:\n`
+    };
+    window.dispatchEvent(new CustomEvent('prefillContact', { detail }));
+    setEnquireOffer(null);
   };
 
   if (loading) {
@@ -106,7 +119,7 @@ const PartyOffers: React.FC = () => {
                 </p>
 
                 <button 
-                  onClick={() => handleEnquire(offer.title)}
+                  onClick={() => setEnquireOffer(offer.title)}
                   className="w-full bg-brand-teal text-brand-yellow font-bold py-4 rounded-xl shadow-[0_8px_0_0_rgba(1,68,91,0.8)] hover:translate-y-2 hover:shadow-[0_0px_0_0_rgba(1,68,91,0.8)] transition-all flex items-center justify-center gap-2 uppercase tracking-wide group-hover:bg-brand-yellow group-hover:text-brand-teal group-hover:shadow-[0_8px_0_0_rgba(202,138,4,0.8)]"
                 >
                   <Mail size={18} /> Enquire Now
@@ -116,6 +129,38 @@ const PartyOffers: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* Enquire Modal */}
+      {enquireOffer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={() => setEnquireOffer(null)}>
+          <div className="bg-brand-cream w-full max-w-md p-8 rounded-3xl shadow-2xl relative border-4 border-brand-teal text-center" onClick={e => e.stopPropagation()}>
+            <button 
+              onClick={() => setEnquireOffer(null)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-brand-teal transition-colors"
+            >
+              <X size={20} />
+            </button>
+            <h3 className="font-display text-2xl text-brand-teal uppercase font-bold mb-2">How would you like to connect?</h3>
+            <p className="text-gray-600 mb-8">Choose your preferred method to enquire about the "{enquireOffer}" package.</p>
+            
+            <div className="space-y-4">
+              <button 
+                onClick={handleWhatsApp}
+                className="w-full bg-[#25D366] text-white font-bold py-4 rounded-xl shadow-[0_8px_0_0_#128C7E] hover:translate-y-2 hover:shadow-[0_0px_0_0_#128C7E] transition-all flex items-center justify-center gap-3 uppercase tracking-wide text-lg"
+              >
+                <MessageCircle size={22} /> WhatsApp Us
+              </button>
+              
+              <button 
+                onClick={handleContactForm}
+                className="w-full bg-brand-teal text-brand-yellow font-bold py-4 rounded-xl shadow-[0_8px_0_0_rgba(1,68,91,0.8)] hover:translate-y-2 hover:shadow-[0_0px_0_0_rgba(1,68,91,0.8)] transition-all flex items-center justify-center gap-3 uppercase tracking-wide text-lg border-2 border-brand-teal"
+              >
+                <Mail size={22} /> Use Contact Form
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

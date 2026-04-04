@@ -30,6 +30,23 @@ const Contact: React.FC = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [countryCode, setCountryCode] = useState('+91');
+  
+  const [subject, setSubject] = useState('Book an Event / Party');
+  const [message, setMessage] = useState('');
+
+  React.useEffect(() => {
+    const handlePrefill = (e: any) => {
+      if (e.detail) {
+        if (e.detail.subject) setSubject(e.detail.subject);
+        if (e.detail.message) setMessage(e.detail.message);
+        
+        const el = document.getElementById('contact');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+    window.addEventListener('prefillContact', handlePrefill);
+    return () => window.removeEventListener('prefillContact', handlePrefill);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,7 +169,7 @@ const Contact: React.FC = () => {
 
               <div>
                 <label className="block text-brand-teal font-bold font-display uppercase tracking-wider text-sm mb-2">Subject</label>
-                <select name="subject" className="w-full bg-brand-cream border border-gray-300 p-3 rounded focus:outline-none focus:border-brand-yellow focus:ring-1 focus:ring-brand-yellow text-gray-700">
+                <select name="subject" value={subject} onChange={(e) => setSubject(e.target.value)} className="w-full bg-brand-cream border border-gray-300 p-3 rounded focus:outline-none focus:border-brand-yellow focus:ring-1 focus:ring-brand-yellow text-gray-700">
                   <option>Book an Event / Party</option>
                   <option>Franchise Enquiry</option>
                   <option>Feedback</option>
@@ -162,7 +179,7 @@ const Contact: React.FC = () => {
 
               <div>
                 <label className="block text-brand-teal font-bold font-display uppercase tracking-wider text-sm mb-2">Message</label>
-                <textarea name="message" required rows={4} className="w-full bg-brand-cream border border-gray-300 p-3 rounded focus:outline-none focus:border-brand-yellow focus:ring-1 focus:ring-brand-yellow" placeholder="Tell us about your event requirements or franchise interest..."></textarea>
+                <textarea name="message" value={message} onChange={(e) => setMessage(e.target.value)} required rows={4} className="w-full bg-brand-cream border border-gray-300 p-3 rounded focus:outline-none focus:border-brand-yellow focus:ring-1 focus:ring-brand-yellow" placeholder="Tell us about your event requirements or franchise interest..."></textarea>
               </div>
 
               <button
