@@ -91,10 +91,11 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <p className="font-sans text-sm tracking-wide">{CONTACT_INFO.phone}</p>
             </div>
             {/* Hours */}
-             <div className="pt-2">
-                <p className="text-xs text-brand-yellow uppercase tracking-widest mb-1">Operating Hours</p>
-                <p className="font-sans text-sm">Mon - Sun : 11:00 AM - 11:00 PM</p>
-             </div>
+            <div>
+              <p className="text-xs text-brand-yellow uppercase tracking-widest mb-1">Operating Hours</p>
+              <p className="text-gray-300">02:00 PM – 10:00 PM</p>
+              <p className="text-brand-yellow/80 text-sm mt-1 border border-brand-yellow/30 inline-block px-2 py-0.5 rounded">All Days</p>
+            </div>
           </div>
         </div>
 

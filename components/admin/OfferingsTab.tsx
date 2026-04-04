@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Plus, Edit2, Trash2, Save, X, Upload, Loader2, Eye, EyeOff, GripVertical, AlertCircle } from 'lucide-react';
+import { Sparkles, Plus, Edit2, Trash2, Save, X, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Offering } from '../../types';
+import { RichTextEditor } from './RichTextEditor';
 
 const ACCEPTED_FORMATS = '.png,.jpg,.jpeg,.svg';
 
@@ -216,12 +217,11 @@ const OfferingsTab: React.FC = () => {
 
           <div className="space-y-1">
             <label className="text-xs font-bold text-brand-teal uppercase">Description *</label>
-            <textarea
+            <RichTextEditor
               value={form.description}
-              onChange={e => setForm({ ...form, description: e.target.value })}
+              onChange={val => setForm({ ...form, description: val })}
               placeholder="A dreamy, evocative description of this offering..."
-              rows={3}
-              className="w-full p-2.5 border rounded focus:outline-none focus:border-brand-teal text-sm"
+              minHeight="150px"
             />
           </div>
 

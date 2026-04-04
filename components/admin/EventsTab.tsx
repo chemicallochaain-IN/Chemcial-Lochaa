@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Save, X, Calendar } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { EventItem } from '../../types';
+import { RichTextEditor } from './RichTextEditor';
 
 const EventsTab: React.FC = () => {
     const [items, setItems] = useState<EventItem[]>([]);
@@ -79,9 +80,14 @@ const EventsTab: React.FC = () => {
                             <label className="block text-xs font-bold text-brand-teal mb-1 uppercase">Title *</label>
                             <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className="w-full border rounded p-2 focus:outline-none focus:border-brand-yellow" />
                         </div>
-                        <div>
-                            <label className="block text-xs font-bold text-brand-teal mb-1 uppercase">Description</label>
-                            <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} className="w-full border rounded p-2 focus:outline-none focus:border-brand-yellow" />
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-brand-teal uppercase">Description</label>
+                            <RichTextEditor 
+                                value={form.description} 
+                                onChange={val => setForm({ ...form, description: val })}
+                                placeholder="Event details..." 
+                                minHeight="150px"
+                            />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>

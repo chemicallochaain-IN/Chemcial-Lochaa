@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Save, X, Shirt } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { MerchItem } from '../../types';
+import { RichTextEditor } from './RichTextEditor';
 
 const MerchTab: React.FC = () => {
     const [items, setItems] = useState<MerchItem[]>([]);
@@ -70,7 +71,12 @@ const MerchTab: React.FC = () => {
                         </div>
                         <div>
                             <label className="block text-xs font-bold text-brand-teal mb-1 uppercase">Description</label>
-                            <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} className="w-full border rounded p-2 focus:outline-none focus:border-brand-yellow" />
+                            <RichTextEditor 
+                                value={form.description} 
+                                onChange={val => setForm({ ...form, description: val })} 
+                                placeholder="Describe this item..."
+                                minHeight="120px"
+                            />
                         </div>
                         <div className="grid grid-cols-3 gap-4">
                             <div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Leaf, Drumstick, Flame } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { MenuItem, MenuCategory } from '../types';
+import { RichTextEditor } from './admin/RichTextEditor';
 
 interface MenuItemFormProps {
   categories: MenuCategory[];
@@ -190,13 +191,12 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({ categories, editingItem, on
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Description</label>
-            <textarea
+            <label className="block text-sm font-bold text-gray-700 mb-2">Description</label>
+            <RichTextEditor
               value={description}
-              onChange={e => setDescription(e.target.value)}
+              onChange={setDescription}
               placeholder="e.g. Served with special sauce, R / L sizes"
-              rows={2}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-teal focus:border-transparent outline-none transition-all resize-none"
+              minHeight="120px"
             />
           </div>
 

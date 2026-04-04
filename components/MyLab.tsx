@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { User, MenuCategory } from '../types';
+import React, { useState, useEffect } from 'react';
+import { User } from '../types';
+import { supabase } from '../lib/supabase';
 import { 
   ShoppingBag, Award, Gift, Shirt, Calendar, Settings, 
-  ExternalLink, Clock, MapPin, Edit2, LogOut, Beaker, Check, Star 
+  ExternalLink, Clock, MapPin, Edit2, LogOut, Beaker, Check, Loader2 
 } from 'lucide-react';
-import { MENU_DATA, CONTACT_INFO } from '../constants';
+import { CONTACT_INFO } from '../constants';
 
 interface MyLabProps {
   user: User;
@@ -16,6 +17,37 @@ type TabType = 'orders' | 'loyalty' | 'rewards' | 'merch' | 'events' | 'settings
 
 const MyLab: React.FC<MyLabProps> = ({ user, onLogout, onOpenOrder }) => {
   const [activeTab, setActiveTab] = useState<TabType>('orders');
+  const [rewards, setRewards] = useState<any[]>([]);
+  const [merch, setMerch] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === 'rewards') fetchRewards();
+    if (activeTab === 'merch') fetchMerch();
+    if (activeTab === 'events') fetchEvents();
+  }, [activeTab]);
+
+  const fetchRewards = async () => {
+    setLoading(true);
+    const { data } = await supabase.from('rewards').select('*').order('created_at', { ascending: false });
+    if (data) setRewards(data);
+    setLoading(false);
+  };
+
+  const fetchMerch = async () => {
+    setLoading(true);
+    const { data } = await supabase.from('merchandise').select('*').order('created_at', { ascending: false });
+    if (data) setMerch(data);
+    setLoading(false);
+  };
+
+  const fetchEvents = async () => {
+    setLoading(true);
+    const { data } = await supabase.from('events').select('*').order('date', { ascending: true });
+    if (data) setEvents(data);
+    setLoading(false);
+  };
 
   const tabs = [
     { id: 'orders', label: 'Orders', icon: ShoppingBag },
@@ -149,64 +181,58 @@ const MyLab: React.FC<MyLabProps> = ({ user, onLogout, onOpenOrder }) => {
   const RewardsTab = () => (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <h3 className="font-display text-2xl text-brand-teal uppercase mb-4">Your Rewards</h3>
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Active Rewards */}
-        <div className="bg-brand-yellow/10 border border-brand-yellow rounded-lg p-6 relative overflow-hidden">
-           <div className="absolute -right-4 -top-4 text-brand-yellow/20"><Gift size={100} /></div>
-           <h4 className="font-display text-xl text-brand-teal font-bold mb-2">Free Beverage</h4>
-           <p className="text-sm text-gray-600 mb-4">You've unlocked a free beverage! Use code <span className="font-mono font-bold bg-white px-2 py-0.5 rounded">LOCHAA3</span> at checkout.</p>
-           <button className="bg-brand-teal text-white px-4 py-2 rounded text-sm font-bold uppercase hover:bg-brand-yellow hover:text-brand-teal transition-colors">Redeem Now</button>
+      {loading ? (
+        <div className="flex justify-center py-12"><Loader2 className="animate-spin text-brand-teal" /></div>
+      ) : (
+        <div className="grid md:grid-cols-2 gap-6">
+          {rewards.map(reward => (
+            <div key={reward.id} className="bg-brand-yellow/10 border border-brand-yellow rounded-lg p-6 relative overflow-hidden">
+               <div className="absolute -right-4 -top-4 text-brand-yellow/20"><Gift size={100} /></div>
+               <h4 className="font-display text-xl text-brand-teal font-bold mb-2">{reward.title}</h4>
+               <div 
+                 className="text-sm text-gray-600 mb-4 prose-sm max-w-none"
+                 dangerouslySetInnerHTML={{ __html: reward.description }}
+               />
+               <button className="bg-brand-teal text-white px-4 py-2 rounded text-sm font-bold uppercase hover:bg-brand-yellow hover:text-brand-teal transition-colors">Redeem Now</button>
+            </div>
+          ))}
+          {rewards.length === 0 && <p className="text-gray-400 italic">No rewards available at the moment.</p>}
         </div>
-
-        {/* Locked Rewards */}
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 opacity-75 grayscale hover:grayscale-0 transition-all">
-           <h4 className="font-display text-xl text-gray-500 font-bold mb-2 flex items-center gap-2">Free Veg Burger <span className="text-xs bg-gray-200 px-2 py-1 rounded text-gray-500">Locked</span></h4>
-           <p className="text-sm text-gray-500 mb-4">Get 2 more stamps to unlock this reward.</p>
-           <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div className="bg-brand-teal h-2.5 rounded-full" style={{ width: '66%' }}></div>
-           </div>
-        </div>
-        
-         <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 opacity-75 grayscale hover:grayscale-0 transition-all">
-           <h4 className="font-display text-xl text-gray-500 font-bold mb-2 flex items-center gap-2">Any Menu Item <span className="text-xs bg-gray-200 px-2 py-1 rounded text-gray-500">Locked</span></h4>
-           <p className="text-sm text-gray-500 mb-4">Get 5 more stamps to unlock this reward.</p>
-           <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div className="bg-brand-teal h-2.5 rounded-full" style={{ width: '44%' }}></div>
-           </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 
   const MerchTab = () => {
-    const products = [
-      { name: "Lab Fridge Magnet", price: 199, img: "https://images.unsplash.com/photo-1596207891316-23ee64166259?auto=format&fit=crop&w=300&q=80" },
-      { name: "Scientist Bracelet", price: 299, img: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&w=300&q=80" },
-      { name: "Chemical Lochaa Tee", price: 799, img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=300&q=80" },
-      { name: "Element Key Chain", price: 149, img: "https://images.unsplash.com/photo-1582035252803-b0e118321350?auto=format&fit=crop&w=300&q=80" },
-    ];
-
     return (
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
         <h3 className="font-display text-2xl text-brand-teal uppercase mb-6">Lab Merchandise</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products.map((prod, idx) => (
-            <div key={idx} className="bg-white border border-brand-teal/20 rounded-lg overflow-hidden group hover:shadow-lg transition-all">
-              <div className="h-40 overflow-hidden">
-                <img src={prod.img} alt={prod.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-              </div>
-              <div className="p-4">
-                <h4 className="font-display text-lg text-brand-teal leading-tight mb-2">{prod.name}</h4>
-                <div className="flex justify-between items-center">
-                  <span className="font-bold text-brand-yellow">₹{prod.price}</span>
-                  <button className="p-1.5 bg-brand-teal text-white rounded hover:bg-brand-yellow hover:text-brand-teal transition-colors">
-                    <ShoppingBag size={16} />
-                  </button>
+        {loading ? (
+          <div className="flex justify-center py-12"><Loader2 className="animate-spin text-brand-teal" /></div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {merch.map((prod) => (
+              <div key={prod.id} className="bg-white border border-brand-teal/20 rounded-lg overflow-hidden group hover:shadow-lg transition-all">
+                <div className="h-40 overflow-hidden">
+                  <img src={prod.image_url} alt={prod.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                </div>
+                <div className="p-4">
+                  <h4 className="font-display text-lg text-brand-teal leading-tight mb-2">{prod.name}</h4>
+                  <div 
+                    className="text-xs text-gray-500 mb-3 line-clamp-2 prose-xs"
+                    dangerouslySetInnerHTML={{ __html: prod.description }}
+                  />
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-brand-yellow">₹{prod.price}</span>
+                    <button className="p-1.5 bg-brand-teal text-white rounded hover:bg-brand-yellow hover:text-brand-teal transition-colors">
+                      <ShoppingBag size={16} />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+            {merch.length === 0 && <p className="text-gray-400 italic">No merchandise available yet.</p>}
+          </div>
+        )}
       </div>
     );
   };
@@ -215,23 +241,39 @@ const MyLab: React.FC<MyLabProps> = ({ user, onLogout, onOpenOrder }) => {
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
        <div className="mb-10">
           <h3 className="font-display text-2xl text-brand-teal uppercase mb-4">Upcoming Exclusive Events</h3>
-          <div className="bg-gradient-to-r from-brand-teal to-blue-900 text-white p-6 rounded-lg shadow-lg relative overflow-hidden">
-            <div className="relative z-10">
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="bg-brand-yellow text-brand-teal text-xs font-bold px-2 py-1 rounded uppercase tracking-wider mb-2 inline-block">Members Only</span>
-                  <h4 className="font-display text-3xl mb-2">Molecular Mixology Workshop</h4>
-                  <p className="opacity-90 max-w-lg mb-4">Learn the science behind our color-changing drinks. Exclusive access for Loyalty members with 5+ stamps.</p>
-                  <button className="bg-white text-brand-teal px-4 py-2 rounded font-bold hover:bg-brand-yellow transition-colors">RSVP Now</button>
+          {loading ? (
+            <div className="flex justify-center py-12"><Loader2 className="animate-spin text-brand-teal" /></div>
+          ) : (
+            <div className="space-y-6">
+              {events.map(event => (
+                <div key={event.id} className="bg-gradient-to-r from-brand-teal to-blue-900 text-white p-6 rounded-lg shadow-lg relative overflow-hidden">
+                  <div className="relative z-10">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        {event.is_exclusive && <span className="bg-brand-yellow text-brand-teal text-xs font-bold px-2 py-1 rounded uppercase tracking-wider mb-2 inline-block">Exclusive</span>}
+                        <h4 className="font-display text-3xl mb-2">{event.title}</h4>
+                        <div 
+                          className="opacity-90 max-w-lg mb-4 text-sm prose-invert prose-sm"
+                          dangerouslySetInnerHTML={{ __html: event.description }}
+                        />
+                        <div className="flex items-center gap-4 text-sm font-bold mb-4">
+                          <span className="flex items-center gap-1"><MapPin size={14} /> {event.location}</span>
+                          <span className="flex items-center gap-1"><Clock size={14} /> {new Date(event.date).toLocaleDateString()} at {event.time}</span>
+                        </div>
+                        <button className="bg-white text-brand-teal px-4 py-2 rounded font-bold hover:bg-brand-yellow transition-colors">RSVP Now</button>
+                      </div>
+                      <div className="hidden md:block text-center bg-white/10 p-4 rounded backdrop-blur-sm min-w-[80px]">
+                         <span className="block text-2xl font-bold font-display">{new Date(event.date).getDate()}</span>
+                         <span className="uppercase text-xs tracking-wider">{new Date(event.date).toLocaleString('default', { month: 'short' })}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <Beaker className="absolute -right-10 -bottom-10 text-white opacity-10 w-64 h-64" />
                 </div>
-                <div className="hidden md:block text-center bg-white/10 p-4 rounded backdrop-blur-sm">
-                   <span className="block text-2xl font-bold font-display">24</span>
-                   <span className="uppercase text-xs tracking-wider">March</span>
-                </div>
-              </div>
+              ))}
+              {events.length === 0 && <p className="text-gray-400 italic">No upcoming events found.</p>}
             </div>
-            <Beaker className="absolute -right-10 -bottom-10 text-white opacity-10 w-64 h-64" />
-          </div>
+          )}
        </div>
 
        <div>

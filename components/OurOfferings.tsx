@@ -115,9 +115,10 @@ const OurOfferings: React.FC = () => {
                     {offering.name}
                   </h3>
                   <div className="overflow-hidden">
-                    <p className="font-sans text-gray-600 leading-relaxed text-sm line-clamp-4 whitespace-pre-wrap">
-                      {offering.description}
-                    </p>
+                    <div 
+                    className="text-gray-600 whitespace-pre-wrap flex-1 text-sm leading-relaxed mb-6 line-clamp-3 prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: offering.description }}
+                  />
                   </div>
                   
                   <div className="mt-2 text-right">
@@ -200,9 +201,11 @@ const OurOfferings: React.FC = () => {
                 {selectedOffering.name}
               </h3>
               <div className="w-16 h-1 bg-brand-yellow mb-6"></div>
-              <p className="font-sans text-gray-700 leading-relaxed whitespace-pre-wrap">
-                {selectedOffering.description}
-              </p>
+              <div 
+                className="font-sans text-gray-700 leading-relaxed whitespace-pre-wrap prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: selectedOffering.description }}
+              />
+            </div>
               
               <div className="mt-10 flex items-center gap-4">
                 <div className="h-[2px] flex-1 bg-gradient-to-r from-brand-teal/20 to-transparent"></div>
@@ -211,7 +214,6 @@ const OurOfferings: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
       )}
     </section>
   );

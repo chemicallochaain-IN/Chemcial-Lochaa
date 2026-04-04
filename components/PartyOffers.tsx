@@ -131,9 +131,10 @@ const PartyOffers: React.FC = () => {
                   </h3>
                 )}
                 
-                <p className="text-gray-600 whitespace-pre-wrap flex-1 text-sm leading-relaxed mb-6 line-clamp-3">
-                  {offer.description}
-                </p>
+                <div 
+                  className="text-gray-600 whitespace-pre-wrap flex-1 text-sm leading-relaxed mb-6 line-clamp-3 prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: offer.description }}
+                />
 
                 <div className="mt-2 text-right">
                   <span className="text-xs font-bold text-brand-teal uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -248,9 +249,10 @@ const PartyOffers: React.FC = () => {
                 </div>
               )}
               <div className="w-16 h-1 bg-brand-yellow mb-6"></div>
-              <p className="font-sans text-gray-700 leading-relaxed whitespace-pre-wrap">
-                {selectedOffer.description}
-              </p>
+              <div 
+                className="font-sans text-gray-700 leading-relaxed whitespace-pre-wrap prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: selectedOffer.description }}
+              />
             </div>
               
             {/* Modal Fixed Footer */}

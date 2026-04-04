@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Save, X, MapPin, Phone, Mail } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Franchise } from '../../types';
+import { RichTextEditor } from './RichTextEditor';
 
 const FranchiseTab: React.FC = () => {
     const [items, setItems] = useState<Franchise[]>([]);
@@ -123,7 +124,12 @@ const FranchiseTab: React.FC = () => {
                         </div>
                         <div>
                             <label className="block text-xs font-bold text-brand-teal mb-1 uppercase">Notes</label>
-                            <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={3} className="w-full border rounded p-2 focus:outline-none focus:border-brand-yellow" placeholder="Internal notes..." />
+                            <RichTextEditor 
+                                value={form.notes} 
+                                onChange={val => setForm({ ...form, notes: val })} 
+                                placeholder="Internal notes or inquiry details..." 
+                                minHeight="150px"
+                            />
                         </div>
                         <div className="flex justify-end gap-2">
                             <button onClick={() => setShowForm(false)} className="px-4 py-2 border rounded text-sm hover:bg-gray-50">Cancel</button>

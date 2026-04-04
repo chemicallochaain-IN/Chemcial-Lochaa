@@ -25,9 +25,10 @@ const MenuItemCard: React.FC<{ item: MenuItem }> = ({ item }) => {
       </div>
       
       {item.description && (
-        <p className="text-sm text-gray-500 font-sans mb-3 italic">
-          {item.description}
-        </p>
+        <div 
+          className="text-sm text-gray-500 font-sans mb-3 italic prose-sm max-w-none"
+          dangerouslySetInnerHTML={{ __html: item.description }}
+        />
       )}
 
       <div className="flex justify-between items-end mt-4 border-t-2 border-dashed border-gray-200 pt-3">
